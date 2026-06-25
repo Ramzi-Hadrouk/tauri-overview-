@@ -5,8 +5,10 @@ import { clients } from '@/backend/config/schema';
 import type { ClientRepository } from './client.repository';
 import type { Client, ClientCreateData, ClientUpdateData } from '../domain/entities';
 import type { ClientFilters } from '../dto/client-filters.dto';
+import { clampPagination } from '@/backend/core/pagination';
 import type { PaginatedResult } from '@/backend/core/pagination';
 import { mapRowToClient } from './mappers';
+import { ClientAlreadyExistsError, ClientNotFoundError } from '../domain/exceptions';
 
 export class DrizzleClientRepository implements ClientRepository {
   private get db() { return getDb(); }
@@ -23,9 +25,7 @@ export class DrizzleClientRepository implements ClientRepository {
   }
 
   async search(filters: ClientFilters): Promise<PaginatedResult<Client>> {
-    const page = Math.max(1, filters.page ?? 1);
-    const size = Math.min(100, Math.max(1, filters.size ?? 20));
-    const offset = (page - 1) * size;
+    const { page, size, offset } = clampPagination(filters.page, filters.size);
 
     const conditions = [];
     if (filters.query) {
@@ -63,25 +63,31 @@ export class DrizzleClientRepository implements ClientRepository {
   }
 
   async save(data: ClientCreateData): Promise<Client> {
-    const id = crypto.randomUUID();
-    const [row] = await this.db.insert(clients).values({
-      id,
-      firstName: data.firstName.trim(),
-      lastName:  data.lastName.trim(),
-      phone:     data.phone?.trim() ?? null,
-      email:     data.email?.toLowerCase().trim() ?? null,
-    }).returning();
-    return mapRowToClient(row);
+    try {
+      const [row] = await this.db.insert(clients).values({
+        firstName: data.firstName.trim(),
+        lastName:  data.lastName.trim(),
+        phone:     data.phone?.trim() ?? null,
+        email:     data.email?.toLowerCase().trim() ?? null,
+      }).returning();
+      return mapRowToClient(row);
+    } catch (err: unknown) {
+      // SQLite UNIQUE constraint violation (code 2067 / SQLITE_CONSTRAINT_UNIQUE)
+      if (isSqliteUniqueError(err) && data.email) {
+        throw new ClientAlreadyExistsError(data.email);
+      }
+      throw err;
+    }
   }
 
   async update(id: string, data: ClientUpdateData): Promise<Client> {
-    const patch: Record<string, unknown> = { updatedAt: new Date() };
+    const patch: Record<string, unknown> = {};
     if (data.firstName !== undefined) patch.firstName = data.firstName.trim();
     if (data.lastName  !== undefined) patch.lastName  = data.lastName.trim();
     if (data.phone     !== undefined) patch.phone     = data.phone.trim() || null;
     if (data.email     !== undefined) patch.email     = data.email.toLowerCase().trim() || null;
     const [row] = await this.db.update(clients).set(patch).where(eq(clients.id, id)).returning();
-    if (!row) throw new Error(`Client ${id} not found`);
+    if (!row) throw new ClientNotFoundError(id);
     return mapRowToClient(row);
   }
 
@@ -93,4 +99,16 @@ export class DrizzleClientRepository implements ClientRepository {
     const rows = await this.db.select({ count: sql<number>`count(*)` }).from(clients);
     return rows[0]?.count ?? 0;
   }
+}
+
+/** Detect a SQLite UNIQUE-constraint violation from better-sqlite3. */
+function isSqliteUniqueError(err: unknown): boolean {
+  if (err && typeof err === 'object' && 'code' in err) {
+    return (err as { code: string }).code === 'SQLITE_CONSTRAINT_UNIQUE';
+  }
+  // better-sqlite3 sets .message to contain 'UNIQUE constraint failed'
+  if (err instanceof Error && err.message.includes('UNIQUE constraint failed')) {
+    return true;
+  }
+  return false;
 }

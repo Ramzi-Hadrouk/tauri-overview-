@@ -1,11 +1,30 @@
+use rusqlite::Connection;
+use std::path::PathBuf;
+use std::sync::Mutex;
+
+/// Application state managed by Tauri.
+/// Injected into every command via `tauri::State<AppState>`.
+pub struct AppState {
+    pub db_path: PathBuf,
+    pub db: Mutex<Connection>,
+}
+
+impl AppState {
+    /// Path to the database file.
+    pub fn db_path(&self) -> &PathBuf {
+        &self.db_path
+    }
+
+    /// Lock and return the database connection.
+    pub fn db(&self) -> std::sync::MutexGuard<'_, Connection> {
+        self.db.lock().expect("db mutex poisoned")
+    }
+}
+
+/// Static (non-db) configuration resolved from the environment at startup.
 pub struct AppConfig;
 
 impl AppConfig {
-    /// Path to the SQLite database file.
-    pub fn db_path() -> String {
-        std::env::var("DB_PATH").unwrap_or_else(|_| "./client-manager.db".into())
-    }
-
     /// Directory for application log files.
     pub fn log_dir() -> String {
         std::env::var("LOG_DIR").unwrap_or_else(|_| {

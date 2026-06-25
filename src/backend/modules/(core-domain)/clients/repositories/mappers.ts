@@ -1,11 +1,8 @@
 // src/backend/modules/(core-domain)/clients/repositories/mappers.ts
 import type { Client } from '../domain/entities';
+import type { clients } from '@/backend/config/schema';
 
-type ClientRow = {
-  id: string; firstName: string; lastName: string;
-  phone: string | null; email: string | null;
-  archived: boolean; createdAt: Date; updatedAt: Date;
-};
+type ClientRow = typeof clients.$inferSelect;
 
 export function mapRowToClient(row: ClientRow): Client {
   return {

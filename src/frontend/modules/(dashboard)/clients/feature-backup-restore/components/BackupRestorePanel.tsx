@@ -6,24 +6,18 @@ import RestoreIcon from '@mui/icons-material/Restore';
 import { useBackup } from '../application/use-backup';
 
 export function BackupRestorePanel() {
-  const { create, restore, getDbPath } = useBackup();
-  const [dbPath, setDbPath] = useState('');
+  const { create, restore } = useBackup();
   const [backupPath, setBackupPath] = useState('');
   const [restorePath, setRestorePath] = useState('');
 
-  const handleResolveDbPath = async () => {
-    const path = await getDbPath();
-    if (path) setDbPath(path);
-  };
-
   const handleCreate = async () => {
-    if (!dbPath || !backupPath) return;
-    await create(dbPath, backupPath);
+    if (!backupPath) return;
+    await create(backupPath);
   };
 
   const handleRestore = async () => {
-    if (!restorePath || !dbPath) return;
-    await restore(restorePath, dbPath);
+    if (!restorePath) return;
+    await restore(restorePath);
   };
 
   return (
@@ -38,22 +32,6 @@ export function BackupRestorePanel() {
 
         <Stack spacing={2}>
           <TextField
-            label="Database path"
-            size="small"
-            value={dbPath}
-            onChange={(e) => setDbPath(e.target.value)}
-            placeholder="e.g. /path/to/client-manager.db"
-            slotProps={{
-              input: {
-                endAdornment: (
-                  <Button size="small" onClick={handleResolveDbPath}>
-                    Use live DB
-                  </Button>
-                ),
-              },
-            }}
-          />
-          <TextField
             label="Target backup file"
             size="small"
             value={backupPath}
@@ -65,7 +43,7 @@ export function BackupRestorePanel() {
               variant="contained"
               startIcon={<BackupIcon />}
               onClick={handleCreate}
-              disabled={!dbPath || !backupPath}
+              disabled={!backupPath}
             >
               Create backup
             </Button>
@@ -95,7 +73,7 @@ export function BackupRestorePanel() {
               color="warning"
               startIcon={<RestoreIcon />}
               onClick={handleRestore}
-              disabled={!dbPath || !restorePath}
+              disabled={!restorePath}
             >
               Restore backup
             </Button>

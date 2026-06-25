@@ -1,14 +1,15 @@
-use crate::env::AppConfig;
+use crate::env::AppState;
+use tauri::State;
 
 #[tauri::command]
-pub fn get_db_path() -> String {
-    AppConfig::db_path()
+pub fn get_db_path(state: State<'_, AppState>) -> String {
+    state.db_path().to_string_lossy().to_string()
 }
 
 #[tauri::command]
-pub fn get_db_size() -> Result<u64, String> {
-    let path = AppConfig::db_path();
-    Ok(std::fs::metadata(&path).map_err(|e| e.to_string())?.len())
+pub fn get_db_size(state: State<'_, AppState>) -> Result<u64, String> {
+    let path = state.db_path();
+    Ok(std::fs::metadata(path).map_err(|e| e.to_string())?.len())
 }
 
 #[tauri::command]

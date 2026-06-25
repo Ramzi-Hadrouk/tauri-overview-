@@ -41,3 +41,31 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+Thumbs.db
+Desktop.ini
+
+# SQLite development databases
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+
+# Application log files
+*.log
+logs/
+
+# Tauri generated schemas (auto-generated from Rust types)
+src-tauri/gen/schemas/
+
+# General build output
+dist/

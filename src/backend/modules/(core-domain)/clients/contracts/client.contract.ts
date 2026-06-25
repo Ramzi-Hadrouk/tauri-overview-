@@ -1,30 +1,24 @@
 // src/backend/modules/(core-domain)/clients/contracts/client.contract.ts
 import { invokeService } from '@/backend/core/service-invoker';
+import { unwrap } from '@/backend/core/result';
 import type { Client, ClientCreateData, ClientUpdateData } from '../domain/entities';
 import type { ClientFilters } from '../dto/client-filters.dto';
 import type { PaginatedResult } from '@/backend/core/pagination';
 
 export const clientContract = {
   async search(filters: ClientFilters): Promise<PaginatedResult<Client>> {
-    const r = await invokeService('searchClientsService', 'execute', filters);
-    if (!r.ok) throw r.error;
-    return r.value as PaginatedResult<Client>;
+    return unwrap(await invokeService('searchClientsService', 'execute', filters));
   },
 
   async create(data: ClientCreateData): Promise<Client> {
-    const r = await invokeService('createClientService', 'execute', data);
-    if (!r.ok) throw r.error;
-    return r.value as Client;
+    return unwrap(await invokeService('createClientService', 'execute', data));
   },
 
   async update(id: string, data: ClientUpdateData): Promise<Client> {
-    const r = await invokeService('updateClientService', 'execute', id, data);
-    if (!r.ok) throw r.error;
-    return r.value as Client;
+    return unwrap(await invokeService('updateClientService', 'execute', id, data));
   },
 
   async delete(id: string): Promise<void> {
-    const r = await invokeService('deleteClientService', 'execute', id);
-    if (!r.ok) throw r.error;
+    unwrap(await invokeService('deleteClientService', 'execute', id));
   },
 };

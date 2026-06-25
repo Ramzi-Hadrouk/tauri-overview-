@@ -4,6 +4,9 @@
   "entries": {
     "0000_init": {
       "name": "init"
+    },
+    "0001_add_email_unique": {
+      "name": "add_email_unique"
     }
   }
 }

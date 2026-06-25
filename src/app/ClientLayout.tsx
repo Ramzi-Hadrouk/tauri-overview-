@@ -22,7 +22,7 @@ export function ClientLayout({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    invoke<string>('get_db_path')
+    invoke('get_db_path', {})
       .then((dbPath) => initApp(dbPath))
       .then(() => setReady(true))
       .catch((err) => setError(String(err)));

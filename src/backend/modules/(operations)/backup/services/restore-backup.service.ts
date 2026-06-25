@@ -1,19 +1,21 @@
 // src/backend/modules/(operations)/backup/services/restore-backup.service.ts
-import { backupContract } from '../contracts/backup.contract';
+import type { BackupContract } from '../contracts/backup.contract';
+import { validateBackupPath } from './create-backup.service';
 import { logger } from '@/backend/core/tracing';
+import { redactPath } from '@/backend/shared/utils/redact-path';
 
 export class RestoreBackupService {
+  constructor(private readonly contract: BackupContract) {}
+
   async execute(backupPath: string): Promise<void> {
-    const dbPath = await backupContract.getDbPath();
-    logger.info('backup.restore.start', { backupPath, dbPath });
-    
-    // Verify backup before restoring
-    const isValid = await backupContract.verify(backupPath);
-    if (!isValid) {
-      throw new Error('Backup file failed integrity check');
-    }
-    
-    await backupContract.restore(backupPath, dbPath);
+    validateBackupPath(backupPath);
+    const dbPath = await this.contract.getDbPath();
+    logger.info('backup.restore.start', { source: redactPath(backupPath) });
+
+    // Integrity is verified inside restore_backup itself, so we do NOT
+    // call verify() here: a separate verify() + restore() would be a TOCTOU
+    // race (the file could change between check and use) and a redundant IPC.
+    await this.contract.restore(backupPath, dbPath);
     logger.info('backup.restore.success');
   }
 }

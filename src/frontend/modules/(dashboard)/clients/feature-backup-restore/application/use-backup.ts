@@ -1,5 +1,7 @@
 'use client';
 import { useCallback, useState } from 'react';
+import { unwrap } from '@/backend/core/result';
+import { invokeService } from '@/backend/core/service-invoker';
 import { backupContract } from '@/backend/modules/(operations)/backup/contracts/backup.contract';
 import { useNotification } from '@/frontend/shared/hooks/useNotification';
 import { useUiStore } from '@/frontend/store/ui-store';
@@ -10,13 +12,13 @@ export function useBackup() {
   const [lastBackupPath, setLastBackupPath] = useState<string | null>(null);
 
   const create = useCallback(
-    async (dbPath: string, targetPath: string) => {
+    async (targetPath: string) => {
       setGlobalLoading(true);
       try {
-        const result = await backupContract.create(dbPath, targetPath);
-        setLastBackupPath(result.path);
-        success(`Backup created at ${result.path}`);
-        return result;
+        const path = unwrap(await invokeService('createBackupService', 'execute', targetPath));
+        setLastBackupPath(path);
+        success(`Backup created at ${path}`);
+        return path;
       } catch (err) {
         error(err instanceof Error ? err.message : String(err));
         throw err;
@@ -28,10 +30,10 @@ export function useBackup() {
   );
 
   const restore = useCallback(
-    async (backupPath: string, targetPath: string) => {
+    async (backupPath: string) => {
       setGlobalLoading(true);
       try {
-        await backupContract.restore(backupPath, targetPath);
+        unwrap(await invokeService('restoreBackupService', 'execute', backupPath));
         success('Backup restored. Reload the app to see changes.');
       } catch (err) {
         error(err instanceof Error ? err.message : String(err));

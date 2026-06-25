@@ -1,8 +1,11 @@
 // src/bootstrap/version-guard.ts
 import { getDb } from '@/backend/config/db';
 import { schemaMeta } from '@/backend/config/schema';
+import {
+  APP_SCHEMA_VERSION,
+  MIN_COMPATIBLE_SCHEMA_VERSION,
+} from '@/backend/config/schema-version';
 import { eq } from 'drizzle-orm';
-import { AppConfig } from '@/backend/config/env';
 import { logger } from '@/backend/core/tracing';
 import { SchemaIncompatibleError } from '@/backend/core/exceptions';
 
@@ -22,22 +25,22 @@ export function writeDbVersion(version: number): void {
 
 export function assertSchemaCompatible(): void {
   const current = readDbVersion();
-  logger.info('schema.version.check', { current, expected: AppConfig.APP_SCHEMA_VERSION });
+  logger.info('schema.version.check', { current, expected: APP_SCHEMA_VERSION });
 
   if (current === 0) {
     // Fresh install — stamp the version and let migrations create the tables.
-    writeDbVersion(AppConfig.APP_SCHEMA_VERSION);
+    writeDbVersion(APP_SCHEMA_VERSION);
     return;
   }
-  if (current < AppConfig.MIN_COMPATIBLE_SCHEMA_VERSION) {
+  if (current < MIN_COMPATIBLE_SCHEMA_VERSION) {
     throw new SchemaIncompatibleError(
-      `DB schema v${current} is below minimum v${AppConfig.MIN_COMPATIBLE_SCHEMA_VERSION}. Restore a compatible backup.`
+      `DB schema v${current} is below minimum v${MIN_COMPATIBLE_SCHEMA_VERSION}. Restore a compatible backup.`
     );
   }
-  if (current > AppConfig.APP_SCHEMA_VERSION) {
+  if (current > APP_SCHEMA_VERSION) {
     throw new SchemaIncompatibleError(
-      `DB schema v${current} is newer than this app (v${AppConfig.APP_SCHEMA_VERSION}). Update the application.`
+      `DB schema v${current} is newer than this app (v${APP_SCHEMA_VERSION}). Update the application.`
     );
   }
-  writeDbVersion(AppConfig.APP_SCHEMA_VERSION);
+  writeDbVersion(APP_SCHEMA_VERSION);
 }
