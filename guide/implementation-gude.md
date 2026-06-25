@@ -193,6 +193,7 @@ client-manager-desktop/
 │       │   ├── backup.rs                 # VACUUM INTO / restore commands
 │       │   ├── database.rs               # get_db_path, get_db_size, write_log
 │       │   └── fs.rs                     # Native FS helpers (future)
+│       ├── env.rs                       # AppConfig: DB_PATH, LOG_DIR, schema version constants
 │       ├── tracing_setup.rs              # tracing-subscriber init (file + stdout)
 │       └── error.rs                      # AppError → serialise to IPC JSON
 │
@@ -605,6 +606,65 @@ const config: NextConfig = {
 export default config;
 ```
 
+### 4.6 Environment Configuration (Rust)
+
+```rust
+// src-tauri/src/env.rs
+pub struct AppConfig;
+
+impl AppConfig {
+    /// Path to the SQLite database file.
+    pub fn db_path() -> String {
+        std::env::var("DB_PATH").unwrap_or_else(|_| "./client-manager.db".into())
+    }
+
+    /// Directory for application log files.
+    pub fn log_dir() -> String {
+        std::env::var("LOG_DIR").unwrap_or_else(|_| {
+            dirs::data_dir()
+                .map(|p| p.join("client-manager-desktop/logs").to_string_lossy().to_string())
+                .unwrap_or_else(|| "./logs".into())
+        })
+    }
+
+    /// Schema version of the current application build.
+    pub fn app_schema_version() -> u32 {
+        std::env::var("APP_SCHEMA_VERSION")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(2)
+    }
+
+    /// Minimum compatible DB schema version this app can open.
+    pub fn min_compatible_schema_version() -> u32 {
+        std::env::var("MIN_COMPATIBLE_SCHEMA_VERSION")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(1)
+    }
+
+    /// Whether the app is running in development mode.
+    pub fn is_dev() -> bool {
+        std::env::var("NODE_ENV").as_deref() != Ok("production")
+    }
+
+    /// Tracing-subscriber filter directive (RUST_LOG).
+    pub fn rust_log() -> String {
+        std::env::var("RUST_LOG").unwrap_or_else(|_| {
+            "info,application=debug,backup=debug,database=debug,migration=debug,ipc=debug,ui=info".into()
+        })
+    }
+}
+```
+
+The Rust `AppConfig` mirrors the TypeScript version in `src/backend/config/env.ts` (Part 7.5). Both sides read the same environment variables so that:
+
+- `DB_PATH` — set by Tauri's `setup()` hook before the frontend boots.
+- `APP_SCHEMA_VERSION` / `MIN_COMPATIBLE_SCHEMA_VERSION` — used by the startup version guard.
+- `NODE_ENV` / `LOG_DIR` / `RUST_LOG` — control tracing output and dev-mode behaviour.
+
+The struct is registered in `src-tauri/src/lib.rs` via `pub mod env;`.
+
 ---
 
 ## PART 5 — Core Utilities
@@ -875,13 +935,64 @@ export function closeDatabase(): void {
 }
 ```
 
-### 7.5 Environment Constants
+### 7.5 Environment Configuration
 
 ```typescript
 // src/backend/config/env.ts
-export const APP_SCHEMA_VERSION = 2;           // bump on every schema-affecting release
-export const MIN_COMPATIBLE_SCHEMA_VERSION = 1; // oldest DB version this app can open
+export class AppConfig {
+  static get NODE_ENV(): string {
+    return process.env.NODE_ENV ?? 'production';
+  }
+
+  static get isDev(): boolean {
+    return AppConfig.NODE_ENV !== 'production';
+  }
+
+  static get DATABASE_URL(): string {
+    return process.env.DATABASE_URL ?? './dev.db';
+  }
+
+  static get APP_SCHEMA_VERSION(): number {
+    const raw = process.env.APP_SCHEMA_VERSION;
+    if (raw !== undefined) {
+      const n = Number(raw);
+      if (!Number.isInteger(n) || n < 1) {
+        throw new Error(`APP_SCHEMA_VERSION must be a positive integer, got: ${raw}`);
+      }
+      return n;
+    }
+    return 2;
+  }
+
+  static get MIN_COMPATIBLE_SCHEMA_VERSION(): number {
+    const raw = process.env.MIN_COMPATIBLE_SCHEMA_VERSION;
+    if (raw !== undefined) {
+      const n = Number(raw);
+      if (!Number.isInteger(n) || n < 0) {
+        throw new Error(`MIN_COMPATIBLE_SCHEMA_VERSION must be a non-negative integer, got: ${raw}`);
+      }
+      return n;
+    }
+    return 1;
+  }
+
+  static get DB_PATH(): string {
+    return process.env.DB_PATH ?? './client-manager.db';
+  }
+}
 ```
+
+The `AppConfig` class provides validated defaults for every environment variable. Both the TypeScript side and the Rust side (see Part 4.6) expose the same contract so that the schema version check at startup is consistent across the language boundary.
+
+Key defaults:
+
+| Property | Env variable | Default | Description |
+|---|---|---|---|
+| `APP_SCHEMA_VERSION` | `APP_SCHEMA_VERSION` | `2` | Bumped on every schema-affecting release |
+| `MIN_COMPATIBLE_SCHEMA_VERSION` | `MIN_COMPATIBLE_SCHEMA_VERSION` | `1` | Oldest DB this app can open |
+| `DB_PATH` | `DB_PATH` | `./client-manager.db` | Location of the SQLite file |
+| `DATABASE_URL` | `DATABASE_URL` | `./dev.db` | Used by drizzle-kit |
+| `isDev` | `NODE_ENV` | `false` (production is default) | Toggles dev mode behaviour |
 
 ---
 
