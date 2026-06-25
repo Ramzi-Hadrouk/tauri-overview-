@@ -3,6 +3,7 @@
 
 pub mod error;
 pub mod commands;
+pub mod env;
 pub mod tracing_setup;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

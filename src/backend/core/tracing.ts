@@ -1,4 +1,5 @@
-// src/backend/core/tracing.ts
+import { AppConfig } from '@/backend/config/env';
+
 type LogLevel = "debug" | "info" | "warn" | "error";
 type LogCategory =
   | "application"
@@ -17,7 +18,7 @@ interface LogEntry {
   spanId?: string;
 }
 
-const isDev = process.env.NODE_ENV !== "production";
+const isDev = AppConfig.isDev;
 
 class Logger {
   private emit(entry: LogEntry): void {

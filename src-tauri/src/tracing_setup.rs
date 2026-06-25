@@ -1,21 +1,15 @@
-// src-tauri/src/tracing_setup.rs
+use crate::env::AppConfig;
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 use tracing_appender::rolling;
 
 pub fn init_tracing() {
-    let log_dir = std::env::var("LOG_DIR").unwrap_or_else(|_| {
-        dirs::data_dir()
-            .map(|p| p.join("client-manager-desktop/logs").to_string_lossy().to_string())
-            .unwrap_or_else(|| "./logs".into())
-    });
+    let log_dir = AppConfig::log_dir();
 
     let file_appender = rolling::daily(&log_dir, "app.log");
     let (file_writer, guard) = tracing_appender::non_blocking(file_appender);
-    std::mem::forget(guard); // Keep alive for app lifetime
+    std::mem::forget(guard);
 
-    let filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| {
-        EnvFilter::new("info,application=debug,backup=debug,database=debug,migration=debug,ipc=debug,ui=info")
-    });
+    let filter = EnvFilter::new(&AppConfig::rust_log());
 
     tracing_subscriber::registry()
         .with(filter)

@@ -1,14 +1,13 @@
-//src-tauri/src/commands/database.rs
-use std::env;
+use crate::env::AppConfig;
 
 #[tauri::command]
 pub fn get_db_path() -> String {
-    env::var("DB_PATH").unwrap_or_else(|_| "./client-manager.db".into())
+    AppConfig::db_path()
 }
 
 #[tauri::command]
 pub fn get_db_size() -> Result<u64, String> {
-    let path = env::var("DB_PATH").map_err(|e| e.to_string())?;
+    let path = AppConfig::db_path();
     Ok(std::fs::metadata(&path).map_err(|e| e.to_string())?.len())
 }
 
