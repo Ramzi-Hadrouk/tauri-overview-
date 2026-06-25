@@ -1,5 +1,5 @@
 'use client';
-import { IconButton, Tooltip, TableRow, TableCell, Chip } from '@mui/material';
+import { IconButton, Tooltip, TableRow, TableCell, Chip, Typography } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import RestoreIcon from '@mui/icons-material/RestoreFromTrash';
@@ -17,7 +17,7 @@ export function ClientRow({ client, onEdit, onDelete }: ClientRowProps) {
   return (
     <TableRow hover>
       <TableCell>
-        <strong>{getClientFullName(client)}</strong>
+        <Typography component="strong" sx={{ fontWeight: 'bold' }}>{getClientFullName(client)}</Typography>
       </TableCell>
       <TableCell>{client.email ?? '—'}</TableCell>
       <TableCell>{client.phone ?? '—'}</TableCell>

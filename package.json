@@ -35,7 +35,6 @@
     "eslint-config-next": "16.2.9",
     "eslint-plugin-import": "^2.32.0",
     "playwright": "^1.61.1",
-    "postcss": "^8.5.15",
     "typescript": "^5",
     "vitest": "^4.1.9"
   }

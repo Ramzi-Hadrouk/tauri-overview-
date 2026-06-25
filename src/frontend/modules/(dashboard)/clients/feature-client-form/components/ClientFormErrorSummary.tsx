@@ -1,5 +1,5 @@
 'use client';
-import { Alert, Box } from '@mui/material';
+import { Alert, Box, Typography } from '@mui/material';
 import { useClientFormStore } from '../application/client-form-store';
 
 export function ClientFormErrorSummary() {
@@ -12,11 +12,11 @@ export function ClientFormErrorSummary() {
     <Box sx={{ mb: 2 }}>
       <Alert severity="error">
         Please fix the following:
-        <ul style={{ margin: '4px 0 0 16px', padding: 0 }}>
+        <Box component="ul" sx={{ m: '4px 0 0 16px', p: 0 }}>
           {messages.map((m) => (
-            <li key={m}>{m}</li>
+            <Typography key={m} component="li" variant="body2">{m}</Typography>
           ))}
-        </ul>
+        </Box>
       </Alert>
     </Box>
   );
