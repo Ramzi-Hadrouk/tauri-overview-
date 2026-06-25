@@ -1,24 +1,26 @@
-// src/backend/modules/(core-domain)/clients/contracts/client.contract.ts
-import { invokeService } from '@/backend/core/service-invoker';
-import { unwrap } from '@/backend/core/result';
+import { invoke } from '@/backend/shared/tauri/ipc-client';
 import type { Client, ClientCreateData, ClientUpdateData } from '../domain/entities';
 import type { ClientFilters } from '../dto/client-filters.dto';
 import type { PaginatedResult } from '@/backend/core/pagination';
 
 export const clientContract = {
+  async getById(id: string): Promise<Client> {
+    return invoke('get_client', { id });
+  },
+
   async search(filters: ClientFilters): Promise<PaginatedResult<Client>> {
-    return unwrap(await invokeService('searchClientsService', 'execute', filters));
+    return invoke('search_clients', { filters });
   },
 
   async create(data: ClientCreateData): Promise<Client> {
-    return unwrap(await invokeService('createClientService', 'execute', data));
+    return invoke('create_client', { data });
   },
 
   async update(id: string, data: ClientUpdateData): Promise<Client> {
-    return unwrap(await invokeService('updateClientService', 'execute', id, data));
+    return invoke('update_client', { id, data });
   },
 
   async delete(id: string): Promise<void> {
-    unwrap(await invokeService('deleteClientService', 'execute', id));
+    await invoke('delete_client', { id });
   },
 };

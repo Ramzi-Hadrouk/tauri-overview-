@@ -3,7 +3,6 @@
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import { lightTheme, darkTheme } from '@/frontend/core/theme';
 import { useUiStore } from '@/frontend/store/ui-store';
-import { initApp } from '@/bootstrap/app-init';
 import { invoke } from '@/backend/shared/tauri/ipc-client';
 import {
   NotificationStack,
@@ -22,10 +21,11 @@ export function ClientLayout({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     invoke('get_db_path', {})
-      .then((dbPath) => initApp(dbPath))
-      .then(() => setReady(true))
-      .catch((err) => setError(String(err)));
+      .then(() => { if (!cancelled) setReady(true); })
+      .catch((err) => { if (!cancelled) setError(String(err)); });
+    return () => { cancelled = true; };
   }, []);
 
   const theme = themeMode === 'dark' ? darkTheme : lightTheme;

@@ -70,8 +70,13 @@ async function resolveInvoke(): Promise<typeof tauriInvokeFn> {
  */
 export interface CommandMap {
   create_backup: { args: { dbPath: string; targetPath: string }; result: string };
-  restore_backup: { args: { backupPath: string; targetPath: string }; result: null };
+  restore_backup: { args: { backupPath: string }; result: null };
   verify_backup: { args: { path: string }; result: boolean };
+  get_client: { args: { id: string }; result: import('@/backend/modules/(core-domain)/clients/domain/entities').Client };
+  search_clients: { args: { filters: import('@/backend/modules/(core-domain)/clients/dto/client-filters.dto').ClientFilters }; result: import('@/backend/core/pagination').PaginatedResult<import('@/backend/modules/(core-domain)/clients/domain/entities').Client> };
+  create_client: { args: { data: import('@/backend/modules/(core-domain)/clients/domain/entities').ClientCreateData }; result: import('@/backend/modules/(core-domain)/clients/domain/entities').Client };
+  update_client: { args: { id: string; data: import('@/backend/modules/(core-domain)/clients/domain/entities').ClientUpdateData }; result: import('@/backend/modules/(core-domain)/clients/domain/entities').Client };
+  delete_client: { args: { id: string }; result: null };
   get_db_path: { args: Record<string, never>; result: string };
   get_db_size: { args: Record<string, never>; result: number };
   write_log: { args: { entry: unknown }; result: null };
@@ -90,10 +95,8 @@ export async function invoke<K extends CommandName>(
   command: K,
   args: CommandMap[K]['args'],
 ): Promise<CommandMap[K]['result']> {
-  const span = logger.startSpan(`ipc:${command}`);
   const invokeImpl = await resolveInvoke();
   if (!invokeImpl) {
-    span.end({ status: 'error', error: 'not in Tauri runtime' });
     throw new ApplicationError(
       'IPC_UNAVAILABLE',
       `Cannot invoke "${command}": not running inside Tauri.`,
@@ -101,12 +104,10 @@ export async function invoke<K extends CommandName>(
   }
   try {
     const result = await invokeImpl(command, args);
-    span.end({ status: 'ok' });
     return result as CommandMap[K]['result'];
   } catch (err) {
     const ipcErr = toIpcError(err);
-    span.end({ status: 'error', error: ipcErr.message });
-    logger.category('ipc').error('ipc.command.failed', { command, error: ipcErr });
+    logger.error('ipc.command.failed', { command, error: ipcErr });
     throw new ApplicationError(`IPC_${ipcErr.kind.toUpperCase()}`, ipcErr.message, { command });
   }
 }

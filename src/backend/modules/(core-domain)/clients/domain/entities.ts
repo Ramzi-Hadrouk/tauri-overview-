@@ -6,8 +6,8 @@ export interface Client {
   phone: string | null;
   email: string | null;
   archived: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: number;
+  updatedAt: number;
 }
 
 export interface ClientCreateData {

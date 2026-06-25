@@ -5,9 +5,10 @@ import { truncate } from '@/frontend/shared/utils/truncate';
 
 export interface BackupStatusDisplayProps {
   lastBackupPath: string | null;
+  lastBackupTime: Date | null;
 }
 
-export function BackupStatusDisplay({ lastBackupPath }: BackupStatusDisplayProps) {
+export function BackupStatusDisplay({ lastBackupPath, lastBackupTime }: BackupStatusDisplayProps) {
   return (
     <Paper variant="outlined" sx={{ p: 2 }}>
       <Stack spacing={0.5}>
@@ -22,9 +23,11 @@ export function BackupStatusDisplay({ lastBackupPath }: BackupStatusDisplayProps
               </Box>{' '}
               {truncate(lastBackupPath, 60)}
             </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Saved {formatDateTime(new Date())}
-            </Typography>
+            {lastBackupTime && (
+              <Typography variant="caption" color="text.secondary">
+                Saved {formatDateTime(lastBackupTime)}
+              </Typography>
+            )}
           </>
         ) : (
           <Typography variant="body2" color="text.secondary">

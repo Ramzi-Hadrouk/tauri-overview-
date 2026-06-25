@@ -25,7 +25,30 @@ pub fn run() {
             tracing::info!(target: "application", "db_path = {}", db_path.display());
 
             let conn = Connection::open(&db_path)?;
-            conn.execute_batch("PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON; PRAGMA synchronous = NORMAL; PRAGMA busy_timeout = 5000;")?;
+            conn.execute_batch(
+                "PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON; \
+                 PRAGMA synchronous = NORMAL; PRAGMA busy_timeout = 5000;",
+            )?;
+
+            conn.execute_batch(
+                "CREATE TABLE IF NOT EXISTS clients (
+                    id         TEXT PRIMARY KEY,
+                    first_name TEXT NOT NULL,
+                    last_name  TEXT NOT NULL,
+                    phone      TEXT,
+                    email      TEXT,
+                    archived   INTEGER NOT NULL DEFAULT 0,
+                    created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+                    updated_at INTEGER NOT NULL DEFAULT (unixepoch())
+                );
+                CREATE INDEX IF NOT EXISTS idx_clients_last_name ON clients(last_name);
+                CREATE INDEX IF NOT EXISTS idx_clients_created_at ON clients(created_at);
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_clients_email_unique ON clients(email);
+                CREATE TABLE IF NOT EXISTS schema_meta (
+                    key   TEXT PRIMARY KEY,
+                    value TEXT NOT NULL
+                );",
+            )?;
 
             app.manage(env::AppState {
                 db_path,
@@ -37,6 +60,11 @@ pub fn run() {
             commands::backup::create_backup,
             commands::backup::restore_backup,
             commands::backup::verify_backup,
+            commands::clients::get_client,
+            commands::clients::search_clients,
+            commands::clients::create_client,
+            commands::clients::update_client,
+            commands::clients::delete_client,
             commands::database::get_db_path,
             commands::database::get_db_size,
             commands::database::write_log,

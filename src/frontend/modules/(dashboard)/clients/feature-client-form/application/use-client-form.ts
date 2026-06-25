@@ -2,7 +2,7 @@
 import { clientContract } from '@/backend/modules/(core-domain)/clients/contracts/client.contract';
 import { useClientFormStore } from '../application/client-form-store';
 import { useNotification } from '@/frontend/shared/hooks/useNotification';
-import { validateClientForm } from '../hooks/use-client-form-validation';
+import { validateClientData } from '@/backend/modules/(core-domain)/clients/domain/rules';
 import { useClientListStore } from '../../feature-client-list/application/client-list-store';
 import { getClientFullName } from '@/frontend/shared/utils/client-display';
 
@@ -12,7 +12,13 @@ export function useClientForm() {
   const { success, error: notifyError } = useNotification();
 
   const submit = async () => {
-    const errors = validateClientForm(store.draft);
+    const backendErrors = validateClientData({
+      firstName: store.draft.firstName || undefined,
+      lastName: store.draft.lastName || undefined,
+      phone: store.draft.phone || undefined,
+      email: store.draft.email || undefined,
+    });
+    const errors: Partial<Record<keyof typeof store.draft, string>> = backendErrors ?? {};
     if (Object.keys(errors).length > 0) {
       store.setErrors(errors);
       return false;

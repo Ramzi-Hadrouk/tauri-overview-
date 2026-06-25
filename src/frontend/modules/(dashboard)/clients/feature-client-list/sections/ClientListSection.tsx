@@ -1,5 +1,5 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Box, CircularProgress, Stack, Typography } from '@mui/material';
 import { useLoadClients } from '../application/use-load-clients';
 import { useClientListStore } from '../application/client-list-store';
@@ -21,7 +21,6 @@ export function ClientListSection() {
   const filters = useClientListStore((s) => s.filters);
   const { requestDelete } = useDeleteClient();
   const openForm = useClientFormStore((s) => s.openForm);
-  const [hydrating, setHydrating] = useState(false);
 
   const clients = items?.items ?? [];
   const hasFilters = Boolean(
@@ -36,9 +35,7 @@ export function ClientListSection() {
   const handleEdit = (id: string) => {
     const target = clients.find((c) => c.id === id);
     if (!target) return;
-    setHydrating(true);
     openForm({ mode: 'edit', editingId: id, initial: target });
-    setHydrating(false);
   };
 
   const totalLabel = useMemo(() => {
@@ -65,7 +62,7 @@ export function ClientListSection() {
 
       <ClientErrorAlert message={lastError} />
 
-      {isFetching || hydrating ? (
+      {isFetching ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
           <CircularProgress />
         </Box>

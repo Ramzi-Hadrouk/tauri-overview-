@@ -4,6 +4,4 @@ export function getClientFullName(c: Pick<Client, 'firstName' | 'lastName'>): st
   return `${c.firstName} ${c.lastName}`.trim();
 }
 
-export function formatClientStatus(archived: boolean): string {
-  return archived ? 'Archived' : 'Active';
-}
+

@@ -1,1 +1,1 @@
-export { isTauri } from './tauri-env';
+export {};
