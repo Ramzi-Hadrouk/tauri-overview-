@@ -1,25 +1,28 @@
 {
-  "name": "tauri",
+  "name": "client-manager-desktop",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx src/bootstrap/migration-runner.ts",
+    "db:studio": "drizzle-kit studio",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "lint": "eslint src --ext .ts,.tsx"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^9.1.1",
     "@mui/material": "^9.1.2",
-    "@prisma/client": "^7.8.0",
     "@tauri-apps/api": "^2.11.1",
-    "@tauri-apps/plugin-dialog": "^2.7.1",
-    "@tauri-apps/plugin-fs": "^2.5.1",
     "better-sqlite3": "^12.11.1",
     "drizzle-orm": "^0.45.2",
-    "install": "^0.13.0",
     "next": "16.2.9",
     "react": "19.2.4",
     "react-dom": "19.2.4",
@@ -28,7 +31,6 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
-    "@tailwindcss/postcss": "^4",
     "@tauri-apps/cli": "^2.11.3",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^20",
@@ -40,8 +42,6 @@
     "eslint-config-next": "16.2.9",
     "eslint-plugin-import": "^2.32.0",
     "playwright": "^1.61.1",
-    "prisma": "^7.8.0",
-    "tailwindcss": "^4",
     "tsx": "^4.22.4",
     "typescript": "^5",
     "vitest": "^4.1.9"
