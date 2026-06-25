@@ -1,23 +1,15 @@
-use rusqlite::Connection;
 use std::path::PathBuf;
-use std::sync::Mutex;
 
 /// Application state managed by Tauri.
 /// Injected into every command via `tauri::State<AppState>`.
 pub struct AppState {
     pub db_path: PathBuf,
-    pub db: Mutex<Connection>,
 }
 
 impl AppState {
     /// Path to the database file.
     pub fn db_path(&self) -> &PathBuf {
         &self.db_path
-    }
-
-    /// Lock and return the database connection.
-    pub fn db(&self) -> std::sync::MutexGuard<'_, Connection> {
-        self.db.lock().expect("db mutex poisoned")
     }
 }
 

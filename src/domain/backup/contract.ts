@@ -1,7 +1,7 @@
-import { invoke } from '@/backend/shared/tauri/ipc-client';
-import { ApplicationError } from '@/backend/core/exceptions';
-import { logger } from '@/backend/core/tracing';
-import { redactPath } from '@/backend/shared/utils/redact-path';
+import { invoke } from '@/domain/tauri/ipc-client';
+import { ApplicationError } from '@/domain/core/exceptions';
+import { logger } from '@/domain/core/tracing';
+import { redactPath } from '@/domain/utils/redact-path';
 
 function validateBackupPath(path: string): void {
   if (!path || !path.trim()) {

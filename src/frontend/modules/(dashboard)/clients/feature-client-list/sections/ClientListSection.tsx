@@ -71,7 +71,7 @@ export function ClientListSection() {
       ) : (
         <>
           <ClientTable items={clients} onEdit={handleEdit} onDelete={handleDelete} />
-          <ClientListPagination />
+          <ClientListPagination total={items?.total ?? 0} />
         </>
       )}
     </Stack>

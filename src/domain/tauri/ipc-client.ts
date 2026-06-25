@@ -1,6 +1,6 @@
 // src/backend/shared/tauri/ipc-client.ts
-import { logger } from '@/backend/core/tracing';
-import { ApplicationError } from '@/backend/core/exceptions';
+import { logger } from '@/domain/core/tracing';
+import { ApplicationError } from '@/domain/core/exceptions';
 
 /**
  * Structured error crossing the TS/Rust IPC boundary.
@@ -72,10 +72,10 @@ export interface CommandMap {
   create_backup: { args: { dbPath: string; targetPath: string }; result: string };
   restore_backup: { args: { backupPath: string }; result: null };
   verify_backup: { args: { path: string }; result: boolean };
-  get_client: { args: { id: string }; result: import('@/backend/modules/(core-domain)/clients/domain/entities').Client };
-  search_clients: { args: { filters: import('@/backend/modules/(core-domain)/clients/dto/client-filters.dto').ClientFilters }; result: import('@/backend/core/pagination').PaginatedResult<import('@/backend/modules/(core-domain)/clients/domain/entities').Client> };
-  create_client: { args: { data: import('@/backend/modules/(core-domain)/clients/domain/entities').ClientCreateData }; result: import('@/backend/modules/(core-domain)/clients/domain/entities').Client };
-  update_client: { args: { id: string; data: import('@/backend/modules/(core-domain)/clients/domain/entities').ClientUpdateData }; result: import('@/backend/modules/(core-domain)/clients/domain/entities').Client };
+  get_client: { args: { id: string }; result: import('@/domain/clients/entities').Client };
+  search_clients: { args: { filters: import('@/domain/clients/client-filters.dto').ClientFilters }; result: import('@/domain/core/pagination').PaginatedResult<import('@/domain/clients/entities').Client> };
+  create_client: { args: { data: import('@/domain/clients/entities').ClientCreateData }; result: import('@/domain/clients/entities').Client };
+  update_client: { args: { id: string; data: import('@/domain/clients/entities').ClientUpdateData }; result: import('@/domain/clients/entities').Client };
   delete_client: { args: { id: string }; result: null };
   get_db_path: { args: Record<string, never>; result: string };
   get_db_size: { args: Record<string, never>; result: number };

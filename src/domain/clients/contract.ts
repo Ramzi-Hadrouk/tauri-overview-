@@ -1,7 +1,7 @@
-import { invoke } from '@/backend/shared/tauri/ipc-client';
-import type { Client, ClientCreateData, ClientUpdateData } from '../domain/entities';
-import type { ClientFilters } from '../dto/client-filters.dto';
-import type { PaginatedResult } from '@/backend/core/pagination';
+import { invoke } from '@/domain/tauri/ipc-client';
+import type { Client, ClientCreateData, ClientUpdateData } from './entities';
+import type { ClientFilters } from './client-filters.dto';
+import type { PaginatedResult } from '@/domain/core/pagination';
 
 export const clientContract = {
   async getById(id: string): Promise<Client> {

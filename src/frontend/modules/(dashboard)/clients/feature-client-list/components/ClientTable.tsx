@@ -1,6 +1,6 @@
 'use client';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
-import type { Client } from '@/backend/modules/(core-domain)/clients/domain/entities';
+import type { Client } from '@/domain/clients/entities';
 import { ClientRow } from './ClientRow';
 
 export interface ClientTableProps {

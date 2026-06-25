@@ -1,19 +1,25 @@
 // src/backend/modules/(core-domain)/clients/domain/rules.ts
 import type { ClientCreateData, ClientUpdateData } from './entities';
 
+// SYNCED_WITH: src-tauri/src/commands/clients.rs
 export const MAX_NAME_LENGTH = 100;
+// SYNCED_WITH: src-tauri/src/commands/clients.rs
 export const PHONE_MIN_DIGITS = 7;
+// SYNCED_WITH: src-tauri/src/commands/clients.rs
 export const PHONE_MAX_DIGITS = 15;
 
+// SYNCED_WITH: src-tauri/src/commands/clients.rs
 export function validateClientName(name: string): boolean {
   const t = name.trim();
   return t.length > 0 && t.length <= MAX_NAME_LENGTH;
 }
 
+// SYNCED_WITH: src-tauri/src/commands/clients.rs
 export function validateEmailFormat(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
 }
 
+// SYNCED_WITH: src-tauri/src/commands/clients.rs
 export function validatePhoneFormat(phone: string): boolean {
   const digits = phone.replace(/\D/g, '');
   return digits.length >= 7 && digits.length <= 15;

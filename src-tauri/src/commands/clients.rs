@@ -3,8 +3,11 @@ use crate::env::AppState;
 use serde::{Deserialize, Serialize};
 use tauri::State;
 
+// SYNCED_WITH: src/domain/clients/rules.ts
 const MAX_NAME_LENGTH: usize = 100;
+// SYNCED_WITH: src/domain/clients/rules.ts
 const PHONE_MIN_DIGITS: usize = 7;
+// SYNCED_WITH: src/domain/clients/rules.ts
 const PHONE_MAX_DIGITS: usize = 15;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -60,6 +63,7 @@ pub struct PaginatedResult {
     pub total_pages: i64,
 }
 
+// SYNCED_WITH: src/domain/clients/rules.ts
 fn validate_name(name: &str) -> Result<(), AppError> {
     let trimmed = name.trim();
     if trimmed.is_empty() {
@@ -74,13 +78,15 @@ fn validate_name(name: &str) -> Result<(), AppError> {
     Ok(())
 }
 
+// SYNCED_WITH: src/domain/clients/rules.ts
 fn validate_email(email: &str) -> Result<(), AppError> {
-    if !email.contains('@') || !email.contains('.') {
+    if !email_address::EmailAddress::is_valid(email) {
         return Err(AppError::Database("Invalid email format".into()));
     }
     Ok(())
 }
 
+// SYNCED_WITH: src/domain/clients/rules.ts
 fn validate_phone(phone: &str) -> Result<(), AppError> {
     let digits: String = phone.chars().filter(|c| c.is_ascii_digit()).collect();
     if digits.len() < PHONE_MIN_DIGITS || digits.len() > PHONE_MAX_DIGITS {

@@ -1,8 +1,8 @@
 'use client';
-import { clientContract } from '@/backend/modules/(core-domain)/clients/contracts/client.contract';
+import { clientContract } from '@/domain/clients/contract';
 import { useClientFormStore } from '../application/client-form-store';
 import { useNotification } from '@/frontend/shared/hooks/useNotification';
-import { validateClientData } from '@/backend/modules/(core-domain)/clients/domain/rules';
+import { validateClientData } from '@/domain/clients/rules';
 import { useClientListStore } from '../../feature-client-list/application/client-list-store';
 import { getClientFullName } from '@/frontend/shared/utils/client-display';
 

@@ -3,11 +3,14 @@ import { Box } from '@mui/material';
 import { Pagination } from '@/frontend/shared/ui';
 import { useClientListStore } from '../application/client-list-store';
 
-export function ClientListPagination() {
+export interface ClientListPaginationProps {
+  total: number;
+}
+
+export function ClientListPagination({ total }: ClientListPaginationProps) {
   const filters = useClientListStore((s) => s.filters);
   const setFilters = useClientListStore((s) => s.setFilters);
 
-  const total = filters.page * filters.size;
   return (
     <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
       <Pagination

@@ -3,7 +3,7 @@ import { IconButton, Tooltip, TableRow, TableCell, Chip } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import RestoreIcon from '@mui/icons-material/RestoreFromTrash';
-import type { Client } from '@/backend/modules/(core-domain)/clients/domain/entities';
+import type { Client } from '@/domain/clients/entities';
 import { getClientFullName } from '@/frontend/shared/utils/client-display';
 import { formatDate } from '@/frontend/shared/utils/format-date';
 

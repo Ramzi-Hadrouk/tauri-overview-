@@ -3,7 +3,7 @@
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import { lightTheme, darkTheme } from '@/frontend/core/theme';
 import { useUiStore } from '@/frontend/store/ui-store';
-import { invoke } from '@/backend/shared/tauri/ipc-client';
+import { backupContract } from '@/domain/backup/contract';
 import {
   NotificationStack,
   ConfirmDialogHost,
@@ -22,7 +22,7 @@ export function ClientLayout({
 
   useEffect(() => {
     let cancelled = false;
-    invoke('get_db_path', {})
+    backupContract.getDbPath()
       .then(() => { if (!cancelled) setReady(true); })
       .catch((err) => { if (!cancelled) setError(String(err)); });
     return () => { cancelled = true; };

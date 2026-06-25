@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Client } from '@/backend/modules/(core-domain)/clients/domain/entities';
+import type { Client } from '@/domain/clients/entities';
 
 export type ClientFormMode = 'create' | 'edit';
 

@@ -2,7 +2,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use rusqlite::Connection;
-use std::sync::Mutex;
 use tauri::Manager;
 
 pub mod error;
@@ -50,10 +49,7 @@ pub fn run() {
                 );",
             )?;
 
-            app.manage(env::AppState {
-                db_path,
-                db: Mutex::new(conn),
-            });
+            app.manage(env::AppState { db_path });
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![

@@ -1,10 +1,10 @@
 // src/frontend/modules/(dashboard)/clients/feature-client-list/application/use-load-clients.ts
 import { useEffect } from 'react';
-import { clientContract } from '@/backend/modules/(core-domain)/clients/contracts/client.contract';
+import { clientContract } from '@/domain/clients/contract';
 import { useClientListStore } from './client-list-store';
 
 export function useLoadClients() {
-  const { filters, setCachedItems, setFetching, setError, cachedItems, isFetching, lastError } =
+  const { filters, setResults, setFetching, setError, results, isFetching, lastError } =
     useClientListStore();
 
   useEffect(() => {
@@ -14,7 +14,7 @@ export function useLoadClients() {
       setError(null);
       try {
         const result = await clientContract.search(filters);
-        if (!cancelled) setCachedItems(result);
+        if (!cancelled) setResults(result);
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : String(err));
       } finally {
@@ -22,7 +22,7 @@ export function useLoadClients() {
       }
     })();
     return () => { cancelled = true; };
-  }, [filters, setCachedItems, setFetching, setError]);
+  }, [filters, setResults, setFetching, setError]);
 
-  return { items: cachedItems, isFetching, lastError };
+  return { items: results, isFetching, lastError };
 }

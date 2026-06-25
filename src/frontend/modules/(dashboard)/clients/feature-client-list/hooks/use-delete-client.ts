@@ -1,5 +1,5 @@
 'use client';
-import { clientContract } from '@/backend/modules/(core-domain)/clients/contracts/client.contract';
+import { clientContract } from '@/domain/clients/contract';
 import { useClientListStore } from '../application/client-list-store';
 import { useConfirm } from '@/frontend/shared/hooks/useConfirm';
 import { useNotification } from '@/frontend/shared/hooks/useNotification';

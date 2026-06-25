@@ -1,6 +1,6 @@
 'use client';
 import { useCallback, useState } from 'react';
-import { backupContract } from '@/backend/modules/(operations)/backup/contracts/backup.contract';
+import { backupContract } from '@/domain/backup/contract';
 import { useNotification } from '@/frontend/shared/hooks/useNotification';
 import { useUiStore } from '@/frontend/store/ui-store';
 
@@ -21,7 +21,6 @@ export function useBackup() {
         return path;
       } catch (err) {
         error(err instanceof Error ? err.message : String(err));
-        throw err;
       } finally {
         setGlobalLoading(false);
       }
@@ -37,7 +36,6 @@ export function useBackup() {
         success('Backup restored. Reload the app to see changes.');
       } catch (err) {
         error(err instanceof Error ? err.message : String(err));
-        throw err;
       } finally {
         setGlobalLoading(false);
       }

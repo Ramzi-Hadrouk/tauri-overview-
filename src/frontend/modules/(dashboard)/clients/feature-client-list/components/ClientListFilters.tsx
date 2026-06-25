@@ -1,7 +1,7 @@
 'use client';
 import { Stack, MenuItem, TextField } from '@mui/material';
 import { useClientListStore } from '../application/client-list-store';
-import type { ClientFilters } from '@/backend/modules/(core-domain)/clients/dto/client-filters.dto';
+import type { ClientFilters } from '@/domain/clients/client-filters.dto';
 
 const SORT_OPTIONS: Array<{ value: `${ClientFilters['sortBy']}:${ClientFilters['sortDir']}`; label: string }> = [
   { value: 'lastName:asc', label: 'Last name (A → Z)' },

@@ -1,4 +1,17 @@
-import { isDev } from '@/backend/config/env';
+import { isDev } from '@/domain/config/env';
+
+let tauriInvokeLog: ((entry: unknown) => Promise<unknown>) | null | undefined;
+
+async function resolveLogWriter() {
+  if (tauriInvokeLog !== undefined) return tauriInvokeLog;
+  try {
+    const api = await import('@tauri-apps/api/core');
+    tauriInvokeLog = (entry: unknown) => api.invoke('write_log', { entry });
+  } catch {
+    tauriInvokeLog = null;
+  }
+  return tauriInvokeLog;
+}
 
 function ts() { return new Date().toISOString(); }
 
@@ -8,10 +21,13 @@ function devLog(level: string, message: string, data?: Record<string, unknown>) 
 }
 
 function prodLog(level: string, message: string, data?: Record<string, unknown>) {
-  import('@tauri-apps/api/core').then(
-    ({ invoke }) => invoke('write_log', { entry: { ts: ts(), level, message, ...data } }),
-    () => devLog(level, message, data),
-  );
+  resolveLogWriter().then((write) => {
+    if (write) {
+      write({ ts: ts(), level, message, ...data });
+    } else {
+      devLog(level, message, data);
+    }
+  });
 }
 
 function emit(level: string, message: string, data?: Record<string, unknown>) {
