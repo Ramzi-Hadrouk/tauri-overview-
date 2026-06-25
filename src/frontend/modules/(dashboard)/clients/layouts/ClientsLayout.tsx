@@ -1,5 +1,5 @@
 // src/frontend/modules/(dashboard)/clients/layouts/ClientsLayout.tsx
-import { Box, Typography } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import type { ReactNode } from 'react';
 
 /**
@@ -9,8 +9,13 @@ import type { ReactNode } from 'react';
  */
 export function ClientsLayout({ children }: { children: ReactNode }) {
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Typography variant="h2">Clients</Typography>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      <Stack
+        direction="row"
+        sx={{ alignItems: 'center', justifyContent: 'space-between' }}
+      >
+        <Typography variant="h2">Clients</Typography>
+      </Stack>
       {children}
     </Box>
   );

@@ -1,6 +1,5 @@
 'use client';
 import { Box, Drawer, AppBar, Toolbar, Typography, List, ListItemButton, ListItemText } from '@mui/material';
-import { useUiStore } from '@/frontend/store/ui-store';
 import { ThemeToggle } from '@/frontend/shared/ui/ThemeToggle';
 import { useRouter, usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';

@@ -298,10 +298,38 @@ client-manager-desktop/
 │       │   │       └── index.ts
 │       │   │
 │       │   ├── ui/                       # Reusable MUI wrapper components (Button, Table, Dialog…)
+│       │   │   ├── ThemeToggle.tsx
+│       │   │   ├── ConfirmDialog.tsx
+│       │   │   ├── ConfirmDialogHost.tsx       # Mounted once in app/layout.tsx
+│       │   │   ├── NotificationStack.tsx       # Mounted once in app/layout.tsx
+│       │   │   ├── LoadingOverlay.tsx          # Mounted once in app/layout.tsx
+│       │   │   ├── EmptyState.tsx
+│       │   │   ├── FormField.tsx               # TextField wrapper with error/helper
+│       │   │   ├── Pagination.tsx
+│       │   │   ├── SearchBar.tsx               # Debounced search input
+│       │   │   └── index.ts
+│       │   │
 │       │   ├── hooks/                    # Reusable hooks: useDebounce, usePrevious…
+│       │   │   ├── useDebounce.ts
+│       │   │   ├── usePrevious.ts
+│       │   │   ├── useConfirm.ts               # Wraps ui-store.openConfirm
+│       │   │   ├── useNotification.ts          # Wraps ui-store.pushNotification
+│       │   │   └── index.ts
+│       │   │
 │       │   ├── utils/                    # Pure TS helpers: formatDate, truncate…
+│       │   │   ├── format-date.ts
+│       │   │   ├── truncate.ts
+│       │   │   ├── client-display.ts
+│       │   │   └── index.ts
+│       │   │
 │       │   ├── lib/                      # Third-party wrappers
+│       │   │   ├── tauri-env.ts                # isTauri()
+│       │   │   └── index.ts
+│       │   │
 │       │   └── constants/               # App-wide enums, labels, route paths
+│       │       ├── routes.ts
+│       │       ├── pagination.ts
+│       │       └── index.ts
 │       │
 │       ├── styles/
 │       │   └── globals.css              # Global CSS resets (minimal — MUI handles most)
@@ -316,22 +344,52 @@ client-manager-desktop/
 │               │   ├── application/
 │               │   │   ├── client-list-store.ts   # Feature state: filters, selectedId, cachedItems
 │               │   │   └── use-load-clients.ts    # Calls clientContract.search → populates store
-│               │   ├── components/
+│               │   ├── components/                # Reusable feature UI
+│               │   │   ├── ClientListToolbar.tsx
+│               │   │   ├── ClientSearchBar.tsx
+│               │   │   ├── ClientListFilters.tsx
+│               │   │   ├── ClientTable.tsx
+│               │   │   ├── ClientRow.tsx
+│               │   │   ├── ClientEmptyState.tsx
+│               │   │   ├── ClientErrorAlert.tsx
+│               │   │   ├── ClientListPagination.tsx
+│               │   │   └── index.ts
 │               │   ├── sections/
 │               │   │   └── ClientListSection.tsx  # Top-level section rendered by page
 │               │   └── hooks/
+│               │       ├── use-delete-client.ts
+│               │       ├── use-edit-client.ts
+│               │       ├── use-create-client.ts
+│               │       └── index.ts
 │               │
-│               ├── feature-client-form/
+│               ├── feature-client-form/         # Dialog-based form, mounted once on the page
 │               │   ├── application/
-│               │   │   ├── client-form-store.ts   # Draft state, validation errors
-│               │   │   └── use-client-form.ts     # create/update via clientContract
+│               │   │   ├── client-form-store.ts   # Draft state, errors, isSubmitting, open
+│               │   │   ├── use-client-form.ts     # create/update via clientContract
+│               │   │   ├── use-client-form-init.ts # Loads a client for edit mode
+│               │   │   └── index.ts
 │               │   ├── components/
-│               │   └── hooks/
+│               │   │   ├── ClientFormDialog.tsx
+│               │   │   ├── ClientFormFields.tsx
+│               │   │   ├── ClientFormActions.tsx
+│               │   │   ├── ClientFormErrorSummary.tsx
+│               │   │   └── index.ts
+│               │   ├── hooks/
+│               │   │   ├── use-client-form-validation.ts  # Mirrors domain/rules.ts
+│               │   │   ├── use-reset-client-form.ts
+│               │   │   └── index.ts
+│               │   └── sections/
+│               │       └── ClientFormHost.tsx    # Mounted once on the page; reads the form store
 │               │
 │               └── feature-backup-restore/
 │                   ├── application/
-│                   │   └── use-backup.ts          # create/restore via backupContract
-│                   └── components/
+│                   │   └── use-backup.ts          # create/restore/verify via backupContract
+│                   ├── components/
+│                   │   ├── BackupRestorePanel.tsx
+│                   │   ├── BackupStatusDisplay.tsx
+│                   │   └── index.ts
+│                   └── sections/
+│                       └── BackupRestoreSection.tsx  # Rendered on /settings
 │
 ├── tests/                                # Global test suite (parallel to src/)
 │   ├── unit/
@@ -381,19 +439,25 @@ client-manager-desktop/
 | What you're creating | Where it goes | May import from |
 |---|---|---|
 | Next.js route page | `src/app/(dashboard)/<route>/page.tsx` | `@/frontend/shared/layouts/`, `@/frontend/modules/` |
-| Root layout | `src/app/layout.tsx` | `@/frontend/core/theme`, `@/frontend/store/`, `@/bootstrap/`, `@/backend/shared/tauri/` |
+| Root layout | `src/app/layout.tsx` | `@/frontend/core/theme`, `@/frontend/store/`, `@/frontend/shared/ui/`, `@/bootstrap/`, `@/backend/shared/tauri/` |
 | App startup logic | `src/bootstrap/` | `@/backend/config/`, `@/backend/core/`, `@/backend/di/` |
 | MUI theme tokens | `src/frontend/core/theme.ts` | Only `@mui/material/styles` |
 | Global UI state | `src/frontend/store/ui-store.ts` | `zustand`, `@/frontend/shared/` |
 | Layout used by ≥ 2 modules | `src/frontend/shared/layouts/<name>/` | `@/frontend/store/`, `@/frontend/core/`, `@/frontend/shared/ui/` |
 | Reusable MUI component | `src/frontend/shared/ui/<Name>.tsx` | MUI, `@/frontend/core/`, `@/frontend/shared/hooks/` |
-| Reusable hook | `src/frontend/shared/hooks/use<Name>.ts` | React, `@/frontend/shared/utils/` |
+| Global host (mounted once) | `src/frontend/shared/ui/<Name>Host.tsx` | `useUiStore`, MUI |
+| Reusable hook | `src/frontend/shared/hooks/use<Name>.ts` | React, `@/frontend/shared/utils/`, `@/frontend/store/` |
+| Wrapper hook (ui-store) | `src/frontend/shared/hooks/use<Domain>.ts` | `@/frontend/store/ui-store` only |
 | Pure utility function | `src/frontend/shared/utils/<name>.ts` | Nothing (pure) |
+| App-wide constants | `src/frontend/shared/constants/<name>.ts` | Nothing (pure) |
+| Third-party wrapper | `src/frontend/shared/lib/<name>.ts` | The wrapped library only |
 | Module-specific layout | `src/frontend/modules/<mod>/layouts/<Name>Layout.tsx` | `@/frontend/shared/layouts/`, MUI |
 | Feature state store | `src/frontend/modules/<mod>/<feat>/application/<name>-store.ts` | `zustand`, backend **types** only |
 | Feature data hook | `src/frontend/modules/<mod>/<feat>/application/use-<name>.ts` | backend `contracts/` + feature store |
 | Feature UI component | `src/frontend/modules/<mod>/<feat>/components/<Name>.tsx` | MUI, feature hooks, `@/frontend/shared/ui/` |
+| Feature action hook | `src/frontend/modules/<mod>/<feat>/hooks/use-<action>.ts` | backend `contracts/`, `@/frontend/shared/hooks/`, feature store |
 | Page fragment (section) | `src/frontend/modules/<mod>/<feat>/sections/<Name>Section.tsx` | Feature components, feature hooks |
+| Dialog host (single mount) | `src/frontend/modules/<mod>/<feat>/sections/<Name>Host.tsx` | Feature components, feature store |
 | Domain entity/value types | `src/backend/modules/<mod>/domain/entities.ts` | Pure TS only |
 | Domain exceptions | `src/backend/modules/<mod>/domain/exceptions.ts` | `@/backend/core/exceptions` |
 | Domain business rules | `src/backend/modules/<mod>/domain/rules.ts` | Own entities only |
@@ -2195,6 +2259,132 @@ export function useLoadClients() {
 | Feature stores hold only `cachedItems`, not source-of-truth | Explicitly named `cachedItems` and re-fetched on filter change |
 | Form draft state is feature-local, not global | Lives inside `feature-client-form` only |
 
+### 17.6 Form Feature Pattern (Dialog + Feature Store)
+
+Forms that need to be triggered from many places (toolbar, row action, etc.) live in their own feature folder and are exposed as a **single dialog host** that is mounted **once** on the page. Openers call the feature store; the host reacts.
+
+```typescript
+// src/frontend/modules/(dashboard)/clients/feature-client-form/application/client-form-store.ts
+import { create } from 'zustand';
+import type { Client } from '@/backend/modules/(core-domain)/clients/domain/entities';
+
+export type ClientFormMode = 'create' | 'edit';
+export interface ClientFormDraft {
+  firstName: string; lastName: string; phone: string; email: string; archived: boolean;
+}
+export const EMPTY_DRAFT: ClientFormDraft = { firstName: '', lastName: '', phone: '', email: '', archived: false };
+
+interface ClientFormState {
+  mode: ClientFormMode;
+  editingId: string | null;
+  isOpen: boolean;
+  draft: ClientFormDraft;
+  errors: Partial<Record<keyof ClientFormDraft, string>>;
+  isSubmitting: boolean;
+
+  openForm: (init: { mode: ClientFormMode; editingId?: string; initial?: Client }) => void;
+  closeForm: () => void;
+  setField: <K extends keyof ClientFormDraft>(field: K, value: ClientFormDraft[K]) => void;
+  setErrors: (errors: ClientFormState['errors']) => void;
+  setSubmitting: (v: boolean) => void;
+  reset: () => void;
+}
+
+export const useClientFormStore = create<ClientFormState>()((set) => ({
+  /* …fields + actions (mode, isOpen, draft, errors, isSubmitting) … */
+  openForm: ({ mode, editingId, initial }) => set({ mode, editingId: editingId ?? null, isOpen: true,
+    draft: initial ? toDraft(initial) : EMPTY_DRAFT, errors: {}, isSubmitting: false }),
+  closeForm: () => set({ isOpen: false }),
+  /* … */
+}));
+```
+
+```tsx
+// src/frontend/modules/(dashboard)/clients/feature-client-form/sections/ClientFormHost.tsx
+'use client';
+import { ClientFormDialog } from '../components';
+/** Mount once on a page; open via useClientFormStore.openForm(...). */
+export function ClientFormHost() { return <ClientFormDialog />; }
+```
+
+```tsx
+// src/app/(dashboard)/clients/page.tsx — single mount
+export default function ClientsPage() {
+  return (
+    <DashboardShell>
+      <ClientsLayout>
+        <ClientListSection />
+      </ClientsLayout>
+      <ClientFormHost />
+    </DashboardShell>
+  );
+}
+```
+
+**Why this pattern:**
+
+- The dialog markup exists in exactly one place, so state, focus, and reset logic is centralised.
+- Any component (toolbar, row action, page-level CTA) can call `useClientFormStore.getState().openForm({ mode: 'edit', editingId })` without prop-drilling.
+- Mounting the host in `app/layout.tsx` would force a global dialog; mounting per-page keeps the form scoped to its feature's routes.
+
+### 17.7 Wrapper Hooks Around the UI Store
+
+The UI store exposes raw mutations (`openConfirm`, `pushNotification`, …). Features should depend on small wrapper hooks instead of reading the store directly, so swapping the underlying store implementation doesn't ripple:
+
+```typescript
+// src/frontend/shared/hooks/useConfirm.ts
+'use client';
+import { useCallback } from 'react';
+import { useUiStore } from '@/frontend/store/ui-store';
+
+export interface ConfirmOptions {
+  title: string;
+  message: string;
+  onConfirm?: () => void;
+  onCancel?: () => void;
+}
+
+export function useConfirm() {
+  const openConfirm = useUiStore((s) => s.openConfirm);
+  const closeConfirm = useUiStore((s) => s.closeConfirm);
+  const confirm = useCallback((opts: ConfirmOptions) => openConfirm(opts), [openConfirm]);
+  return { confirm, closeConfirm };
+}
+```
+
+```typescript
+// src/frontend/shared/hooks/useNotification.ts
+'use client';
+import { useCallback } from 'react';
+import { useUiStore } from '@/frontend/store/ui-store';
+
+export type NotificationSeverity = 'success' | 'info' | 'warning' | 'error';
+export interface NotifyOptions { severity?: NotificationSeverity; message: string; }
+
+export function useNotification() {
+  const pushNotification = useUiStore((s) => s.pushNotification);
+  const dismissNotification = useUiStore((s) => s.dismissNotification);
+  const success = useCallback((m: string) => pushNotification({ severity: 'success', message: m }), [pushNotification]);
+  const info    = useCallback((m: string) => pushNotification({ severity: 'info',    message: m }), [pushNotification]);
+  const warning = useCallback((m: string) => pushNotification({ severity: 'warning', message: m }), [pushNotification]);
+  const error   = useCallback((m: string) => pushNotification({ severity: 'error',   message: m }), [pushNotification]);
+  return { success, info, warning, error, dismissNotification };
+}
+```
+
+The **global dialog host** and **notification stack** are mounted once in `app/layout.tsx`:
+
+```tsx
+{ready && (
+  <>
+    {children}
+    <NotificationStack />
+    <ConfirmDialogHost />
+    <LoadingOverlay />
+  </>
+)}
+```
+
 ---
 
 ## PART 18 — MUI Theme Setup
@@ -2444,6 +2634,46 @@ export default function ClientsPage() {
 }
 ```
 
+### 19.4 Settings Page (Backup / Restore Section)
+
+The settings page hosts the **backup-restore** feature, which lives in the clients module because it operates on the same database. Only the section is mounted — the section composes its own panel and status display.
+
+```tsx
+// src/app/(dashboard)/settings/page.tsx
+import { DashboardShell } from '@/frontend/shared/layouts/dashboard-shell';
+import { Box, Typography } from '@mui/material';
+import { BackupRestoreSection } from '@/frontend/modules/(dashboard)/clients/feature-backup-restore/sections/BackupRestoreSection';
+
+export default function SettingsPage() {
+  return (
+    <DashboardShell>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+        <Typography variant="h2">Settings</Typography>
+        <BackupRestoreSection />
+      </Box>
+    </DashboardShell>
+  );
+}
+```
+
+```tsx
+// src/frontend/modules/(dashboard)/clients/feature-backup-restore/sections/BackupRestoreSection.tsx
+'use client';
+import { Stack } from '@mui/material';
+import { BackupRestorePanel, BackupStatusDisplay } from '../components';
+import { useBackup } from '../application/use-backup';
+
+export function BackupRestoreSection() {
+  const { lastBackupPath } = useBackup();
+  return (
+    <Stack spacing={2}>
+      <BackupStatusDisplay lastBackupPath={lastBackupPath} />
+      <BackupRestorePanel />
+    </Stack>
+  );
+}
+```
+
 ---
 
 ## PART 20 — Build & Distribution
@@ -2569,3 +2799,204 @@ Runtime stack:
 ```
 
 **This architecture is fully compatible with a Tauri desktop application running without a Next.js server in production. No internal HTTP requests exist anywhere in the data path. Every layer is tested. Every import boundary is enforced by ESLint. The theme persists. Setup is a single `npm ci` + `cargo build`.**
+
+---
+
+## PART 22 — Implemented Component Inventory
+
+> This part is the **bill of materials** for the frontend implementation that satisfies the plans in Parts 0–21. Every file listed exists in the repository. Per the Code Placement table (Part 3), the "May import from" column is the same one applied to each row above.
+
+### 22.1 Component Hierarchy
+
+```
+Page  (src/app/(dashboard)/…/page.tsx)
+ └── DashboardShell                       (shared/layouts)
+      └── ModuleLayout                    (modules/<mod>/layouts)
+           ├── Section(s)                 (modules/<mod>/<feat>/sections)
+           │    └── Components            (modules/<mod>/<feat>/components)
+           │         └── Hooks            (modules/<mod>/<feat>/hooks + application)
+           │              └── Store       (modules/<mod>/<feat>/application/<name>-store)
+           │                   └── Contract    (backend/modules/<mod>/contracts)
+           │                        └── Service    (backend/modules/<mod>/services)
+           │                             └── Repository (backend/modules/<mod>/repositories)
+           └── (optional) FeatureHost(s)  (single mount per page)
+                └── Components → Store
+```
+
+### 22.2 File Tree (frontend additions only)
+
+```
+src/frontend/
+├── core/theme.ts                              ✅ (existing)
+├── store/
+│   ├── ui-store.ts                            ✅ (existing)
+│   └── index.ts                               ✅ (existing)
+├── styles/globals.css                         ✅ (existing)
+├── shared/
+│   ├── layouts/dashboard-shell/
+│   │   ├── DashboardShell.tsx                 ✅ (existing)
+│   │   └── index.ts                           ✅ (existing)
+│   ├── ui/
+│   │   ├── ThemeToggle.tsx                    ✅ (existing)
+│   │   ├── ConfirmDialog.tsx                  ➕ NEW
+│   │   ├── ConfirmDialogHost.tsx              ➕ NEW
+│   │   ├── NotificationStack.tsx              ➕ NEW
+│   │   ├── LoadingOverlay.tsx                 ➕ NEW
+│   │   ├── EmptyState.tsx                     ➕ NEW
+│   │   ├── FormField.tsx                      ➕ NEW
+│   │   ├── Pagination.tsx                     ➕ NEW
+│   │   ├── SearchBar.tsx                      ➕ NEW
+│   │   └── index.ts                           ➕ NEW
+│   ├── hooks/
+│   │   ├── useDebounce.ts                     ➕ NEW
+│   │   ├── usePrevious.ts                     ➕ NEW
+│   │   ├── useConfirm.ts                      ➕ NEW
+│   │   ├── useNotification.ts                 ➕ NEW
+│   │   └── index.ts                           ➕ NEW
+│   ├── utils/
+│   │   ├── format-date.ts                     ➕ NEW
+│   │   ├── truncate.ts                        ➕ NEW
+│   │   ├── client-display.ts                  ➕ NEW
+│   │   └── index.ts                           ➕ NEW
+│   ├── lib/
+│   │   ├── tauri-env.ts                       ➕ NEW
+│   │   └── index.ts                           ➕ NEW
+│   └── constants/
+│       ├── routes.ts                          ➕ NEW
+│       ├── pagination.ts                      ➕ NEW
+│       └── index.ts                           ➕ NEW
+└── modules/(dashboard)/clients/
+    ├── layouts/ClientsLayout.tsx              🔧 UPDATED
+    ├── feature-client-list/
+    │   ├── application/
+    │   │   ├── client-list-store.ts           ✅ (existing)
+    │   │   └── use-load-clients.ts            ✅ (existing)
+    │   ├── components/
+    │   │   ├── ClientListToolbar.tsx          ➕ NEW
+    │   │   ├── ClientSearchBar.tsx            ➕ NEW
+    │   │   ├── ClientListFilters.tsx          ➕ NEW
+    │   │   ├── ClientTable.tsx                ➕ NEW
+    │   │   ├── ClientRow.tsx                  ➕ NEW
+    │   │   ├── ClientEmptyState.tsx           ➕ NEW
+    │   │   ├── ClientErrorAlert.tsx           ➕ NEW
+    │   │   ├── ClientListPagination.tsx       ➕ NEW
+    │   │   └── index.ts                       ➕ NEW
+    │   ├── hooks/
+    │   │   ├── use-delete-client.ts           ➕ NEW
+    │   │   ├── use-edit-client.ts             ➕ NEW
+    │   │   ├── use-create-client.ts           ➕ NEW
+    │   │   └── index.ts                       ➕ NEW
+    │   └── sections/ClientListSection.tsx     🔧 UPDATED (composes the above)
+    ├── feature-client-form/                   ➕ NEW FEATURE
+    │   ├── application/
+    │   │   ├── client-form-store.ts           ➕ NEW
+    │   │   ├── use-client-form.ts             ➕ NEW
+    │   │   ├── use-client-form-init.ts        ➕ NEW
+    │   │   └── index.ts                       ➕ NEW
+    │   ├── components/
+    │   │   ├── ClientFormDialog.tsx           ➕ NEW
+    │   │   ├── ClientFormFields.tsx           ➕ NEW
+    │   │   ├── ClientFormActions.tsx          ➕ NEW
+    │   │   ├── ClientFormErrorSummary.tsx     ➕ NEW
+    │   │   └── index.ts                       ➕ NEW
+    │   ├── hooks/
+    │   │   ├── use-client-form-validation.ts  ➕ NEW
+    │   │   ├── use-reset-client-form.ts       ➕ NEW
+    │   │   └── index.ts                       ➕ NEW
+    │   └── sections/ClientFormHost.tsx        ➕ NEW
+    └── feature-backup-restore/                ➕ NEW FEATURE
+        ├── application/
+        │   ├── use-backup.ts                  ➕ NEW
+        │   └── index.ts                       ➕ NEW
+        ├── components/
+        │   ├── BackupRestorePanel.tsx         ➕ NEW
+        │   ├── BackupStatusDisplay.tsx        ➕ NEW
+        │   └── index.ts                       ➕ NEW
+        └── sections/BackupRestoreSection.tsx  ➕ NEW
+```
+
+Plus:
+
+- `src/app/layout.tsx` — **updated** to mount `<NotificationStack />`, `<ConfirmDialogHost />`, `<LoadingOverlay />` once.
+- `src/app/(dashboard)/clients/page.tsx` — **updated** to mount `<ClientListSection />` + `<ClientFormHost />`.
+- `src/app/(dashboard)/settings/page.tsx` — **updated** to mount `<BackupRestoreSection />`.
+- `src/app/globals.css` — Tailwind removed; MUI handles styling.
+
+### 22.3 Per-File Purpose and Signatures
+
+| File | Purpose | Key exports |
+|---|---|---|
+| `shared/hooks/useDebounce.ts` | Debounce a value (used by `SearchBar`). | `useDebounce<T>(value, delay?): T` |
+| `shared/hooks/usePrevious.ts` | Track previous value across renders. | `usePrevious<T>(value): T \| undefined` |
+| `shared/hooks/useConfirm.ts` | Wrap `ui-store.openConfirm` for ergonomic confirmation dialogs. | `useConfirm(): { confirm(opts), closeConfirm() }` |
+| `shared/hooks/useNotification.ts` | Wrap `ui-store.pushNotification` with severity helpers. | `useNotification(): { success, info, warning, error, dismissNotification }` |
+| `shared/utils/format-date.ts` | Locale-aware date / datetime formatters. | `formatDate`, `formatDateTime` |
+| `shared/utils/truncate.ts` | Truncate strings with suffix. | `truncate(text, max?, suffix?)` |
+| `shared/utils/client-display.ts` | `getClientFullName`, `formatClientStatus`. | (type-only import: `Client`) |
+| `shared/lib/tauri-env.ts` | Detect Tauri runtime. | `isTauri(): boolean` |
+| `shared/constants/routes.ts` | Route path constants. | `ROUTES`, `AppRoute` |
+| `shared/constants/pagination.ts` | Default page size + options. | `DEFAULT_PAGE_SIZE`, `PAGE_SIZE_OPTIONS` |
+| `shared/ui/ThemeToggle.tsx` | Light/dark switch in `AppBar`. | `ThemeToggle` |
+| `shared/ui/ConfirmDialog.tsx` | MUI `Dialog` reading `useUiStore.confirm`. | `ConfirmDialog` |
+| `shared/ui/ConfirmDialogHost.tsx` | Single mount-point for the global confirm dialog. | `ConfirmDialogHost` |
+| `shared/ui/NotificationStack.tsx` | MUI `Snackbar` + `Alert` over `useUiStore.notifications`. | `NotificationStack` |
+| `shared/ui/LoadingOverlay.tsx` | MUI `Backdrop` over `useUiStore.globalLoading`. | `LoadingOverlay` |
+| `shared/ui/EmptyState.tsx` | Generic empty state (title, description, action). | `EmptyState`, `EmptyStateProps` |
+| `shared/ui/FormField.tsx` | MUI `TextField` wrapper with name/label/errorMessage. | `FormField`, `FormFieldProps` |
+| `shared/ui/Pagination.tsx` | `TablePagination` wrapper with the project page-size options. | `Pagination`, `PaginationProps` |
+| `shared/ui/SearchBar.tsx` | Debounced search input (used by `ClientSearchBar`). | `SearchBar`, `SearchBarProps` |
+| `modules/(dashboard)/clients/layouts/ClientsLayout.tsx` | Module layout — title + content slot. | `ClientsLayout` |
+| `…/feature-client-list/application/client-list-store.ts` | Feature state: `filters`, `selectedClientId`, `cachedItems`, `isFetching`, `lastError`. | `useClientListStore` |
+| `…/feature-client-list/application/use-load-clients.ts` | On `filters` change, call `clientContract.search` and write to the store. | `useLoadClients(): { items, isFetching, lastError }` |
+| `…/feature-client-list/components/ClientListToolbar.tsx` | "New Client" + show-archived toggle. | `ClientListToolbar` |
+| `…/feature-client-list/components/ClientSearchBar.tsx` | Debounced search input bound to `filters.query`. | `ClientSearchBar` |
+| `…/feature-client-list/components/ClientListFilters.tsx` | Sort selector. | `ClientListFilters` |
+| `…/feature-client-list/components/ClientTable.tsx` | MUI `Table` listing clients. | `ClientTable` |
+| `…/feature-client-list/components/ClientRow.tsx` | Single row with Edit/Delete actions. | `ClientRow` |
+| `…/feature-client-list/components/ClientEmptyState.tsx` | Empty state. | `ClientEmptyState` |
+| `…/feature-client-list/components/ClientErrorAlert.tsx` | List error banner. | `ClientErrorAlert` |
+| `…/feature-client-list/components/ClientListPagination.tsx` | Wraps `Pagination` for the feature. | `ClientListPagination` |
+| `…/feature-client-list/hooks/use-delete-client.ts` | Open confirm → call `clientContract.delete` → refresh list. | `useDeleteClient(): { requestDelete(id, displayName) }` |
+| `…/feature-client-list/hooks/use-edit-client.ts` | Open the form store in `edit` mode for a given id. | `useEditClient(): { openEdit }` |
+| `…/feature-client-list/hooks/use-create-client.ts` | Open the form store in `create` mode. | `useCreateClient(): { openCreate }` |
+| `…/feature-client-list/sections/ClientListSection.tsx` | Page fragment composing all of the above. | `ClientListSection` |
+| `…/feature-client-form/application/client-form-store.ts` | Form state: `mode`, `editingId`, `isOpen`, `draft`, `errors`, `isSubmitting`. | `useClientFormStore`, `ClientFormMode`, `ClientFormDraft`, `EMPTY_DRAFT` |
+| `…/feature-client-form/application/use-client-form.ts` | Validate, submit (`create` / `update`), refresh list, close. | `useClientForm(): { submit(): Promise<boolean> }` |
+| `…/feature-client-form/application/use-client-form-init.ts` | Load a client by id and call `openForm({ mode: 'edit', initial })`. | `useClientFormInit(): { openCreate, openEditById }` |
+| `…/feature-client-form/components/ClientFormDialog.tsx` | MUI `Dialog` reading the form store. | `ClientFormDialog` |
+| `…/feature-client-form/components/ClientFormFields.tsx` | First/last/email/phone fields, archived toggle in edit. | `ClientFormFields` |
+| `…/feature-client-form/components/ClientFormActions.tsx` | Cancel / Save buttons. | `ClientFormActions` |
+| `…/feature-client-form/components/ClientFormErrorSummary.tsx` | Top-of-dialog error list. | `ClientFormErrorSummary` |
+| `…/feature-client-form/hooks/use-client-form-validation.ts` | Mirrors `domain/rules.ts`. | `validateClientForm(draft)`, `ClientFormErrors` |
+| `…/feature-client-form/hooks/use-reset-client-form.ts` | Reset the form store. | `useResetClientForm(): () => void` |
+| `…/feature-client-form/sections/ClientFormHost.tsx` | Single mount of the dialog. | `ClientFormHost` |
+| `…/feature-backup-restore/application/use-backup.ts` | `create`, `restore`, `verify`, `getDbPath` over `backupContract`. | `useBackup(): { create, restore, verify, getDbPath, lastBackupPath }` |
+| `…/feature-backup-restore/components/BackupRestorePanel.tsx` | Create / restore form with path inputs. | `BackupRestorePanel` |
+| `…/feature-backup-restore/components/BackupStatusDisplay.tsx` | Last backup summary. | `BackupStatusDisplay` |
+| `…/feature-backup-restore/sections/BackupRestoreSection.tsx` | Composes panel + status for the settings page. | `BackupRestoreSection` |
+| `app/layout.tsx` | Root layout — bootstraps DB, mounts shared UI hosts. | `RootLayout` |
+| `app/(dashboard)/clients/page.tsx` | Composes `DashboardShell` + `ClientsLayout` + `ClientListSection` + `ClientFormHost`. | `ClientsPage` |
+| `app/(dashboard)/settings/page.tsx` | Composes `DashboardShell` + `BackupRestoreSection`. | `SettingsPage` |
+
+### 22.4 Mounting Cheat-Sheet
+
+| Mount location | Hosts to render |
+|---|---|
+| `app/layout.tsx` (once, after `ready`) | `<NotificationStack />`, `<ConfirmDialogHost />`, `<LoadingOverlay />` |
+| `app/(dashboard)/clients/page.tsx` | `<ClientListSection />`, `<ClientFormHost />` |
+| `app/(dashboard)/settings/page.tsx` | `<BackupRestoreSection />` |
+
+### 22.5 Cleanup Notes
+
+- `src/app/globals.css` previously imported Tailwind. The file is now a one-line comment pointer to the real reset (`src/frontend/styles/globals.css`). Safe to delete if desired.
+- `src/frontend/shared/layouts/dashboard-shell/DashboardShell.tsx` — the unused `useUiStore` import was removed (pre-existing lint warning).
+
+### 22.6 Open Items / Future Work
+
+| Item | Suggested location |
+|---|---|
+| Backup file-picker dialog (native via Tauri) | `feature-backup-restore/components/BackupFilePicker.tsx` + invoke `tauri-plugin-dialog` |
+| Client-row context menu (more than 2 actions) | `feature-client-list/components/ClientRowMenu.tsx` |
+| Per-feature unit tests for `useClientForm` and `useDeleteClient` | `tests/unit/feature-*.test.ts` (Vitest + happy-dom) |
+| Vitest + Testing Library for `ClientListSection` | `tests/component/client-list.test.tsx` |
+| E2E: clients CRUD + backup round-trip | `tests/e2e/clients.e2e.spec.ts` (already in Part 16.6 — just not implemented) |

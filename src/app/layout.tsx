@@ -8,6 +8,11 @@ import { lightTheme, darkTheme } from '@/frontend/core/theme';
 import { useUiStore } from '@/frontend/store/ui-store';
 import { initApp } from '@/bootstrap/app-init';
 import { invoke } from '@/backend/shared/tauri/ipc-client';
+import {
+  NotificationStack,
+  ConfirmDialogHost,
+  LoadingOverlay,
+} from '@/frontend/shared/ui';
 import { useEffect, useState } from 'react';
 
 export const metadata: Metadata = {
@@ -38,11 +43,18 @@ export default function RootLayout({
       <body>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          {error
-            ? <StartupError message={error} />
-            : ready
-              ? children
-              : <BootSplash />}
+          {error ? (
+            <StartupError message={error} />
+          ) : ready ? (
+            <>
+              {children}
+              <NotificationStack />
+              <ConfirmDialogHost />
+              <LoadingOverlay />
+            </>
+          ) : (
+            <BootSplash />
+          )}
         </ThemeProvider>
       </body>
     </html>
