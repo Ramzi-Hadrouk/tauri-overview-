@@ -10,30 +10,40 @@ const typography = {
   body2: { fontSize: '0.875rem' },
 };
 
-const shape = { borderRadius: 8 };
+const shape = { borderRadius: 10 };
 
 export const lightTheme: Theme = createTheme({
   typography: { ...typography },
   shape,
+  spacing: 8,
   palette: {
     mode: 'light',
-    primary:    { main: '#2563EB', contrastText: '#fff' },
-    secondary:  { main: '#7C3AED' },
-    background: { default: '#F8FAFC', paper: '#FFFFFF' },
-    text:       { primary: '#0F172A', secondary: '#475569' },
-    divider:    '#E2E8F0',
+    primary:    { main: '#00B16A', contrastText: '#FFFFFF' },
+    secondary:  { main: '#00a2a3', contrastText: '#eef7f7' },
+    success:    { main: '#009843', contrastText: '#ecf9ee' },
+    warning:    { main: '#da9600', contrastText: '#211300' },
+    error:      { main: '#df2225', contrastText: '#fff0ee' },
+    info:       { main: '#0081d0', contrastText: '#eaf7ff' },
+    background: { default: '#FFFFFF', paper: '#FCFCFC' },
+    text:       { primary: '#0a140f', secondary: '#535a56' },
+    divider:    '#dbe4de',
   },
 });
 
 export const darkTheme: Theme = createTheme({
   typography: { ...typography },
   shape,
+  spacing: 8,
   palette: {
     mode: 'dark',
-    primary:    { main: '#3B82F6', contrastText: '#fff' },
-    secondary:  { main: '#8B5CF6' },
-    background: { default: '#0F172A', paper: '#1E293B' },
-    text:       { primary: '#F1F5F9', secondary: '#94A3B8' },
-    divider:    '#334155',
+    primary:    { main: '#00975a', contrastText: '#090f0c' },
+    secondary:  { main: '#00a2a3', contrastText: '#080f0f' },
+    success:    { main: '#009843', contrastText: '#071009' },
+    warning:    { main: '#da9600', contrastText: '#1c0f00' },
+    error:      { main: '#df2225', contrastText: '#150a09' },
+    info:       { main: '#0081d0', contrastText: '#060e15' },
+    background: { default: '#070505', paper: '#15201E' },
+    text:       { primary: '#d3e2d9', secondary: '#bec7c1' },
+    divider:    '#010201',
   },
 });

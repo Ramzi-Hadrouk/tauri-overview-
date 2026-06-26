@@ -38,7 +38,7 @@ export function ItemListSection() {
   }, [items]);
 
   return (
-    <Stack spacing={2}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <ItemListToolbar onNewItem={() => openForm({ mode: 'create' })} />
 
       <Stack
@@ -51,18 +51,19 @@ export function ItemListSection() {
 
       <ItemErrorAlert message={lastError} />
 
-      {isFetching ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
-          <CircularProgress />
-        </Box>
-      ) : itemList.length === 0 ? (
-        <ItemEmptyState onNewItem={() => openForm({ mode: 'create' })} />
-      ) : (
-        <>
+      <Box sx={{ flex: 1, overflow: 'auto' }}>
+        {isFetching ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+            <CircularProgress />
+          </Box>
+        ) : itemList.length === 0 ? (
+          <ItemEmptyState onNewItem={() => openForm({ mode: 'create' })} />
+        ) : (
           <ItemTable items={itemList} onEdit={handleEdit} onDelete={handleDelete} />
-          <ItemListPagination total={items?.total ?? 0} />
-        </>
-      )}
-    </Stack>
+        )}
+      </Box>
+
+      {items && <ItemListPagination total={items.total} />}
+    </Box>
   );
 }

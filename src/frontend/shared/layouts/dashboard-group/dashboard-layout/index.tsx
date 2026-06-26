@@ -1,6 +1,7 @@
 'use client';
 import { Box, Drawer, IconButton, List, ListItemButton, ListItemIcon, ListItemText, Tooltip } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
+import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import Inventory2Icon from '@mui/icons-material/Inventory2';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { ThemeToggle } from '@/frontend/shared/ui/ThemeToggle';
@@ -24,7 +25,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const drawerWidth = drawerOpen ? DRAWER_OPEN_WIDTH : DRAWER_CLOSED_WIDTH;
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh' }}>
+    <Box sx={{ display: 'flex', height: '100vh', position: 'relative' }}>
       <Drawer variant="permanent" sx={{
         width: drawerWidth,
         flexShrink: 0,
@@ -37,12 +38,12 @@ export function DashboardShell({ children }: { children: ReactNode }) {
           transition: 'width 0.2s ease',
         },
       }}>
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 1 }}>
-          <IconButton onClick={() => setDrawerOpen(!drawerOpen)}>
-            <MenuIcon />
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', py: 0.5, pr: 0.5 }}>
+          <IconButton onClick={() => setDrawerOpen(!drawerOpen)} size="small">
+            {drawerOpen ? <MenuOpenIcon /> : <MenuIcon />}
           </IconButton>
         </Box>
-        <List>
+        <List sx={{ pt: 0 }}>
           {NAV.map(({ label, path, icon }) => (
             <Tooltip key={path} title={drawerOpen ? '' : label} placement="right">
               <ListItemButton
@@ -62,7 +63,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
           <ThemeToggle />
         </Box>
       </Drawer>
-      <Box component="main" sx={{ flexGrow: 1, p: 3, overflow: 'auto', height: '100vh' }}>
+      <Box component="main" sx={{ flexGrow: 1, p: 3, overflow: 'auto' }}>
         {children}
       </Box>
     </Box>
