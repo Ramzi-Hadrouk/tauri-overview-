@@ -15,6 +15,7 @@ pub fn run() {
     tracing_setup::init_tracing();
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             let app_dir = app.path().app_data_dir().map_err(|e| {
                 Box::new(std::io::Error::new(std::io::ErrorKind::NotFound, e))

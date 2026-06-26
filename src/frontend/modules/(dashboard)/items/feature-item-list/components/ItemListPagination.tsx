@@ -14,7 +14,7 @@ export function ItemListPagination({ total }: ItemListPaginationProps) {
   const setSize = useItemListStore((s) => s.setSize);
 
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+    <Box sx={{ position: 'sticky', bottom: 0, bgcolor: 'background.paper', borderTop: 1, borderColor: 'divider', zIndex: 1, py: 1, display: 'flex', justifyContent: 'flex-end' }}>
       <Pagination
         total={total}
         page={page - 1}

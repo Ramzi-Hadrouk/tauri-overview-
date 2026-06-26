@@ -1,45 +1,68 @@
 'use client';
-import { Box, Drawer, AppBar, Toolbar, Typography, List, ListItemButton, ListItemText } from '@mui/material';
+import { Box, Drawer, IconButton, List, ListItemButton, ListItemIcon, ListItemText, Tooltip } from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
+import Inventory2Icon from '@mui/icons-material/Inventory2';
+import SettingsIcon from '@mui/icons-material/Settings';
 import { ThemeToggle } from '@/frontend/shared/ui/ThemeToggle';
 import { useRouter, usePathname } from 'next/navigation';
+import { useUiStore } from '@/frontend/store/ui-store';
 import type { ReactNode } from 'react';
 
-const DRAWER_WIDTH = 240;
+const DRAWER_OPEN_WIDTH = 240;
+const DRAWER_CLOSED_WIDTH = 57;
 const NAV = [
-  { label: 'Items',  path: '/items' },
-  { label: 'Settings', path: '/settings' },
+  { label: 'Items',  path: '/items',  icon: <Inventory2Icon /> },
+  { label: 'Settings', path: '/settings', icon: <SettingsIcon /> },
 ];
 
 export function DashboardShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const drawerOpen = useUiStore((s) => s.drawerOpen);
+  const setDrawerOpen = useUiStore((s) => s.setDrawerOpen);
+
+  const drawerWidth = drawerOpen ? DRAWER_OPEN_WIDTH : DRAWER_CLOSED_WIDTH;
 
   return (
     <Box sx={{ display: 'flex', height: '100vh' }}>
-      <AppBar position="fixed" sx={{ zIndex: (t) => t.zIndex.drawer + 1 }}>
-        <Toolbar>
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>Item Manager</Typography>
-          <ThemeToggle />
-        </Toolbar>
-      </AppBar>
       <Drawer variant="permanent" sx={{
-        width: DRAWER_WIDTH, flexShrink: 0,
-        '& .MuiDrawer-paper': { width: DRAWER_WIDTH, boxSizing: 'border-box' },
+        width: drawerWidth,
+        flexShrink: 0,
+        whiteSpace: 'nowrap',
+        transition: 'width 0.2s ease',
+        '& .MuiDrawer-paper': {
+          width: drawerWidth,
+          boxSizing: 'border-box',
+          overflowX: 'hidden',
+          transition: 'width 0.2s ease',
+        },
       }}>
-        <Toolbar />
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 1 }}>
+          <IconButton onClick={() => setDrawerOpen(!drawerOpen)}>
+            <MenuIcon />
+          </IconButton>
+        </Box>
         <List>
-          {NAV.map(({ label, path }) => (
-            <ListItemButton
-              key={path}
-              selected={pathname === path}
-              onClick={() => router.push(path)}
-            >
-              <ListItemText primary={label} />
-            </ListItemButton>
+          {NAV.map(({ label, path, icon }) => (
+            <Tooltip key={path} title={drawerOpen ? '' : label} placement="right">
+              <ListItemButton
+                selected={pathname === path}
+                onClick={() => router.push(path)}
+                sx={{ minHeight: 48, justifyContent: drawerOpen ? 'initial' : 'center', px: 2.5 }}
+              >
+                <ListItemIcon sx={{ minWidth: 0, mr: drawerOpen ? 2 : 'auto', justifyContent: 'center' }}>
+                  {icon}
+                </ListItemIcon>
+                {drawerOpen && <ListItemText primary={label} />}
+              </ListItemButton>
+            </Tooltip>
           ))}
         </List>
+        <Box sx={{ mt: 'auto', display: 'flex', justifyContent: 'center', py: 1 }}>
+          <ThemeToggle />
+        </Box>
       </Drawer>
-      <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8 }}>
+      <Box component="main" sx={{ flexGrow: 1, p: 3, overflow: 'auto', height: '100vh' }}>
         {children}
       </Box>
     </Box>

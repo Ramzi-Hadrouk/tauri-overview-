@@ -1,23 +1,32 @@
 'use client';
-import { useState } from 'react';
-import { Paper, Stack, Typography, Button, Divider, TextField, Box } from '@mui/material';
+import { Paper, Stack, Typography, Button, Divider, Box } from '@mui/material';
 import BackupIcon from '@mui/icons-material/Backup';
-import RestoreIcon from '@mui/icons-material/Restore';
+import FolderOpenIcon from '@mui/icons-material/FolderOpen';
+import { save, open } from '@tauri-apps/plugin-dialog';
 import { useBackup } from '../application/use-backup';
+
+const DB_FILTER = [{ name: 'SQLite Database', extensions: ['db', 'sqlite', 'sqlite3'] }];
 
 export function BackupRestorePanel() {
   const { create, restore } = useBackup();
-  const [backupPath, setBackupPath] = useState('');
-  const [restorePath, setRestorePath] = useState('');
 
   const handleCreate = async () => {
-    if (!backupPath) return;
-    await create(backupPath);
+    const path = await save({
+      filters: DB_FILTER,
+      defaultPath: `backup-${new Date().toISOString().slice(0, 10)}.db`,
+    });
+    if (!path) return;
+    await create(path);
   };
 
   const handleRestore = async () => {
-    if (!restorePath) return;
-    await restore(restorePath);
+    const path = await open({
+      filters: DB_FILTER,
+      multiple: false,
+      directory: false,
+    });
+    if (!path) return;
+    await restore(path);
   };
 
   return (
@@ -30,25 +39,11 @@ export function BackupRestorePanel() {
           </Typography>
         </Box>
 
-        <Stack spacing={2}>
-          <TextField
-            label="Target backup file"
-            size="small"
-            value={backupPath}
-            onChange={(e) => setBackupPath(e.target.value)}
-            placeholder="e.g. ./backups/backup-2025-01-01.db"
-          />
-          <Box>
-            <Button
-              variant="contained"
-              startIcon={<BackupIcon />}
-              onClick={handleCreate}
-              disabled={!backupPath}
-            >
-              Create backup
-            </Button>
-          </Box>
-        </Stack>
+        <Box>
+          <Button variant="contained" startIcon={<BackupIcon />} onClick={handleCreate}>
+            Create backup
+          </Button>
+        </Box>
 
         <Divider />
 
@@ -59,26 +54,11 @@ export function BackupRestorePanel() {
           </Typography>
         </Box>
 
-        <Stack spacing={2}>
-          <TextField
-            label="Backup file to restore from"
-            size="small"
-            value={restorePath}
-            onChange={(e) => setRestorePath(e.target.value)}
-            placeholder="e.g. ./backups/backup-2025-01-01.db"
-          />
-          <Box>
-            <Button
-              variant="outlined"
-              color="warning"
-              startIcon={<RestoreIcon />}
-              onClick={handleRestore}
-              disabled={!restorePath}
-            >
-              Restore backup
-            </Button>
-          </Box>
-        </Stack>
+        <Box>
+          <Button variant="outlined" color="warning" startIcon={<FolderOpenIcon />} onClick={handleRestore}>
+            Choose backup file to restore
+          </Button>
+        </Box>
       </Stack>
     </Paper>
   );
