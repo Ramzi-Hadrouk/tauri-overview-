@@ -18,8 +18,13 @@ export async function invoke<T>(
   args?: Record<string, unknown>,
 ): Promise<IpcResponse<T>> {
   try {
-    return await tauriInvoke<IpcResponse<T>>(command, args);
+    const result = await tauriInvoke<IpcResponse<T>>(command, args);
+    if (!result.success) {
+      throw new IpcError('error', result.message || 'Request failed');
+    }
+    return result;
   } catch (raw) {
+    if (raw instanceof IpcError) throw raw;
     const error = raw as AppError;
     throw new IpcError(
       error.code ?? 'unknown_error',

@@ -19,7 +19,3 @@ pub fn init_tracing() {
 
     tracing::info!(target: "application", "tracing initialized");
 }
-
-pub fn tracing_span(name: &str) -> tracing::Span {
-    tracing::info_span!("operation", name = name)
-}

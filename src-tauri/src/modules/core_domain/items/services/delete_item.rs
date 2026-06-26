@@ -17,11 +17,12 @@ impl<'a> DeleteItemService<'a> {
     pub async fn execute(&self, id: &str) -> Result<(), AppError> {
         let repo = ItemRepository::new(self.db);
 
-        if repo.get_by_id(id).await?.is_none() {
-            return Err(ItemError::NotFound.into());
-        }
+        let existing = repo.get_by_id(id).await?
+            .ok_or(ItemError::NotFound)?;
 
-        sqlx::query("DELETE FROM items WHERE id = ?")
+        tracing::info!(target: "application", item_id = %id, item_name = %existing.name, "deleting item");
+
+        sqlx::query("UPDATE items SET is_active = 0, updated_at = datetime('now') WHERE id = ?")
             .bind(id)
             .execute(self.db)
             .await?;

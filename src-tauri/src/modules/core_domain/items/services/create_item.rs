@@ -33,6 +33,8 @@ impl<'a> CreateItemService<'a> {
 
         let id = uuid::Uuid::new_v4().to_string();
 
+        tracing::info!(target: "application", item_name = %trimmed_name, "creating item");
+
         let item = sqlx::query_as::<_, Item>(
             "INSERT INTO items (id, name, description, is_active, created_at, updated_at)
              VALUES (?, ?, ?, 1, datetime('now'), datetime('now'))

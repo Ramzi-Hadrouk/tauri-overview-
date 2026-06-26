@@ -11,6 +11,3 @@ pub fn validate_name(name: &str) -> Result<(), String> {
     Ok(())
 }
 
-pub fn can_activate_item(is_active: bool) -> bool {
-    is_active
-}

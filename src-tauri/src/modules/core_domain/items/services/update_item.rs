@@ -42,6 +42,8 @@ impl<'a> UpdateItemService<'a> {
 
         let is_active = data.is_active.unwrap_or(existing.is_active);
 
+        tracing::info!(target: "application", item_id = %id, item_name = %name, "updating item");
+
         let item = sqlx::query_as::<_, Item>(
             "UPDATE items SET name = ?, description = ?, is_active = ?, updated_at = datetime('now')
              WHERE id = ?

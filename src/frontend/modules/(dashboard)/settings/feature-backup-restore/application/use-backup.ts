@@ -14,7 +14,7 @@ export function useBackup() {
     async (targetPath: string) => {
       setGlobalLoading(true);
       try {
-        const result = await backupCommands.createBackup('', targetPath);
+        const result = await backupCommands.createBackup(targetPath);
         setLastBackupPath(result.data ?? targetPath);
         setLastBackupTime(new Date());
         success(`Backup created at ${result.data ?? targetPath}`);

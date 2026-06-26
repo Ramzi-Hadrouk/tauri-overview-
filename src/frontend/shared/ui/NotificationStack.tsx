@@ -1,29 +1,36 @@
 'use client';
-import { Snackbar, Alert } from '@mui/material';
+import { Snackbar, Alert, Stack } from '@mui/material';
 import { useUiStore } from '@/frontend/store/ui-store';
 
 export function NotificationStack() {
   const { notifications, dismissNotification } = useUiStore();
-  const current = notifications[0];
 
-  if (!current) return null;
+  if (notifications.length === 0) return null;
 
   return (
-    <Snackbar
-      key={current.id}
-      open
-      autoHideDuration={5000}
-      onClose={() => dismissNotification(current.id)}
-      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+    <Stack
+      spacing={1}
+      sx={{ position: 'fixed', bottom: 24, right: 24, zIndex: 2000 }}
     >
-      <Alert
-        onClose={() => dismissNotification(current.id)}
-        severity={current.severity}
-        variant="filled"
-        sx={{ width: '100%' }}
-      >
-        {current.message}
-      </Alert>
-    </Snackbar>
+      {notifications.slice(0, 3).map((n) => (
+        <Snackbar
+          key={n.id}
+          open
+          autoHideDuration={5000}
+          onClose={() => dismissNotification(n.id)}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          sx={{ position: 'static' }}
+        >
+          <Alert
+            onClose={() => dismissNotification(n.id)}
+            severity={n.severity}
+            variant="filled"
+            sx={{ width: '100%', minWidth: 300 }}
+          >
+            {n.message}
+          </Alert>
+        </Snackbar>
+      ))}
+    </Stack>
   );
 }
