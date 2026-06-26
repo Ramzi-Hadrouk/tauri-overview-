@@ -15,7 +15,7 @@ impl<'a> CreateBackupService<'a> {
     }
 
     pub async fn execute(&self, target_path: &str) -> Result<String, AppError> {
-        let validated_target = path_utils::validate_path(target_path, self.root)?;
+        let validated_target = path_utils::validate_create_path(target_path)?;
         let validated_db = path_utils::validate_path(self.db_path, self.root)?;
 
         let target_str = validated_target.to_string_lossy().to_string();

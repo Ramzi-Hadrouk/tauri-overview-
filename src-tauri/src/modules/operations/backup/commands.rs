@@ -18,9 +18,12 @@ pub async fn create_backup(
     let db_path = Path::new(&state.db_path);
     let root = db_path.parent().unwrap_or_else(|| Path::new("."));
 
+    let target = path_utils::validate_create_path(&target_path)?;
+    let _db = path_utils::validate_path(&state.db_path, root)?;
+
     let db = state.db.lock().await;
     let service = CreateBackupService::new(&db, &state.db_path, root);
-    let path = service.execute(&target_path).await?;
+    let path = service.execute(&target.to_string_lossy()).await?;
     Ok(IpcResponse::success(path, "Backup created successfully"))
 }
 
@@ -30,12 +33,10 @@ pub async fn restore_backup(
     state: State<'_, AppState>,
 ) -> Result<IpcResponse<()>, AppError> {
     let live_path = Path::new(&state.db_path).to_path_buf();
-    let root = live_path.parent()
-        .unwrap_or_else(|| Path::new("."))
-        .to_path_buf();
+    let _validated = path_utils::validate_create_path(&backup_path)?;
 
     let db = state.db.lock().await;
-    let service = RestoreBackupService::new(&db, &live_path, &root);
+    let service = RestoreBackupService::new(&db, &live_path);
     service.execute(&backup_path).await?;
     drop(db);
 
@@ -47,11 +48,11 @@ pub async fn restore_backup(
 #[tauri::command]
 pub async fn verify_backup(
     path: String,
-    state: State<'_, AppState>,
 ) -> Result<IpcResponse<bool>, AppError> {
-    let db_path = Path::new(&state.db_path);
-    let root = db_path.parent().unwrap_or_else(|| Path::new("."));
-    let validated = path_utils::validate_path(&path, root)?;
+    let validated = path_utils::validate_create_path(&path)?;
+    if !validated.exists() {
+        return Err(AppError::validation("path", &format!("File not found: {}", validated.display())));
+    }
     let valid = VerifyBackupService::execute(&validated.to_string_lossy()).await?;
     Ok(IpcResponse::success(valid, "Backup verification complete"))
 }
