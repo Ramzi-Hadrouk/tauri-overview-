@@ -29,6 +29,7 @@ ts-rs = { version = "10", features = ["serde-compat"] }
 thiserror = "2"
 uuid = { version = "1", features = ["v4"] }
 dirs = "5"
+base64 = "0.22"
 
 [features]
 default = ["custom-protocol"]

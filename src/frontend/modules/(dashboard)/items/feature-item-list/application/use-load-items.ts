@@ -3,8 +3,14 @@ import { itemsCommands } from '@/frontend/core/ipc/contracts/items';
 import { useItemListStore } from './item-list-store';
 
 export function useLoadItems() {
-  const { page, size, setResults, setFetching, setError, results, isFetching, lastError } =
-    useItemListStore();
+  const page = useItemListStore((s) => s.page);
+  const size = useItemListStore((s) => s.size);
+  const setResults = useItemListStore((s) => s.setResults);
+  const setFetching = useItemListStore((s) => s.setFetching);
+  const setError = useItemListStore((s) => s.setError);
+  const results = useItemListStore((s) => s.results);
+  const isFetching = useItemListStore((s) => s.isFetching);
+  const lastError = useItemListStore((s) => s.lastError);
 
   useEffect(() => {
     let cancelled = false;

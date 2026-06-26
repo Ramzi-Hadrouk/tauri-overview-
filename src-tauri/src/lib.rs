@@ -8,7 +8,7 @@ pub mod modules;
 pub mod tracing_setup;
 
 const DB_FILENAME: &str = "client-manager.db";
-const CURRENT_SCHEMA_VERSION: u32 = 2;
+const CURRENT_SCHEMA_VERSION: u32 = 3;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -70,6 +70,7 @@ pub fn run() {
             modules::core_domain::items::commands::create_item,
             modules::core_domain::items::commands::update_item,
             modules::core_domain::items::commands::delete_item,
+            modules::core_domain::items::commands::get_item_image,
             // Backup
             modules::operations::backup::commands::create_backup,
             modules::operations::backup::commands::restore_backup,

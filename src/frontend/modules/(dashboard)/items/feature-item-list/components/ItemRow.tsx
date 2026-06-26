@@ -1,8 +1,27 @@
 'use client';
-import { IconButton, Tooltip, TableRow, TableCell, Chip, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { IconButton, Tooltip, TableRow, TableCell, Chip, Typography, Avatar } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import type { Item } from '@/frontend/shared/types/generated/Item';
+import { itemsCommands } from '@/frontend/core/ipc/contracts/items';
+
+function ItemThumbnail({ path }: { path: string | null }) {
+  const [src, setSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!path) return;
+    let cancelled = false;
+    itemsCommands.getItemImage(path).then((res) => {
+      if (!cancelled && res.data) setSrc(res.data);
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [path]);
+
+  if (!path) return <Typography variant="caption" color="text.disabled">—</Typography>;
+  if (!src) return <Typography variant="caption" color="text.disabled">Loading…</Typography>;
+  return <Avatar src={src} variant="rounded" sx={{ width: 36, height: 36 }} />;
+}
 
 export interface ItemRowProps {
   item: Item;
@@ -16,7 +35,17 @@ export function ItemRow({ item, onEdit, onDelete }: ItemRowProps) {
       <TableCell>
         <Typography component="strong" sx={{ fontWeight: 'bold' }}>{item.name}</Typography>
       </TableCell>
-      <TableCell>{item.description ?? '—'}</TableCell>
+      <TableCell>
+        <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>{item.sku}</Typography>
+      </TableCell>
+      <TableCell>${Number(item.price).toFixed(2)}</TableCell>
+      <TableCell>{Number(item.quantity)}</TableCell>
+      <TableCell>
+        <Typography variant="caption" color="text.secondary" sx={{ maxWidth: 120, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {item.tags || '—'}
+        </Typography>
+      </TableCell>
+      <TableCell><ItemThumbnail path={item.image_path} /></TableCell>
       <TableCell>
         {item.is_active ? (
           <Chip label="Active" size="small" color="success" variant="outlined" />

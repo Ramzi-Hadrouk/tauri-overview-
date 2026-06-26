@@ -26,14 +26,27 @@ export function useItemForm() {
         const created = await itemsCommands.createItem({
           name: store.draft.name.trim(),
           description: store.draft.description.trim() || null,
+          sku: store.draft.sku.trim() || null,
+          quantity: store.draft.quantity,
+          price: store.draft.price,
+          tags: store.draft.tags.trim() || null,
+          image: store.draft.image || null,
         });
         if (created.data) success(`Item "${created.data.name}" created`);
       } else if (store.editingId) {
-        const updated = await itemsCommands.updateItem(store.editingId, {
+        const payload: Record<string, unknown> = {
           name: store.draft.name.trim() || null,
           description: store.draft.description.trim() || null,
+          sku: store.draft.sku.trim() || null,
+          quantity: store.draft.quantity,
+          price: store.draft.price,
+          tags: store.draft.tags.trim() || null,
           is_active: store.draft.is_active,
-        });
+        };
+        if (store.draft.image !== null) {
+          payload.image = store.draft.image;
+        }
+        const updated = await itemsCommands.updateItem(store.editingId, payload as Parameters<typeof itemsCommands.updateItem>[1]);
         if (updated.data) success(`Item "${updated.data.name}" updated`);
       }
 

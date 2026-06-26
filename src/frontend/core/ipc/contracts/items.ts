@@ -23,4 +23,7 @@ export const itemsCommands = {
 
   deleteItem: (id: string): Promise<IpcResponse<null>> =>
     invoke('delete_item', { id }),
+
+  getItemImage: (path: string): Promise<IpcResponse<string>> =>
+    invoke('get_item_image', { path }),
 } as const;

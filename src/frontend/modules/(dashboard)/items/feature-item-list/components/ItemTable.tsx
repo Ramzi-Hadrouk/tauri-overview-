@@ -16,7 +16,11 @@ export function ItemTable({ items, onEdit, onDelete }: ItemTableProps) {
         <TableHead>
           <TableRow>
             <TableCell>Name</TableCell>
-            <TableCell>Description</TableCell>
+            <TableCell>SKU</TableCell>
+            <TableCell>Price</TableCell>
+            <TableCell>Qty</TableCell>
+            <TableCell>Tags</TableCell>
+            <TableCell>Image</TableCell>
             <TableCell>Status</TableCell>
             <TableCell>Created</TableCell>
             <TableCell align="right">Actions</TableCell>

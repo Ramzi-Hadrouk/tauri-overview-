@@ -4,5 +4,3 @@ export type { Item } from './Item';
 export type { CreateItemInput } from './CreateItemInput';
 export type { UpdateItemInput } from './UpdateItemInput';
 export type { AppError } from './AppError';
-export type { User } from './User';
-export type { Order } from './Order';

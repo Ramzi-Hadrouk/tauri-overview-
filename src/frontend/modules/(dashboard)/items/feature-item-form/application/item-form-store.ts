@@ -6,12 +6,22 @@ export type ItemFormMode = 'create' | 'edit';
 export interface ItemFormDraft {
   name: string;
   description: string;
+  sku: string;
+  quantity: number;
+  price: number;
+  tags: string;
+  image: string | null;
   is_active: boolean;
 }
 
 export const EMPTY_DRAFT: ItemFormDraft = {
   name: '',
   description: '',
+  sku: '',
+  quantity: 0,
+  price: 0,
+  tags: '',
+  image: null,
   is_active: true,
 };
 
@@ -48,6 +58,11 @@ export const useItemFormStore = create<ItemFormState>()((set) => ({
         ? {
             name: initial.name,
             description: initial.description ?? '',
+            sku: initial.sku,
+            quantity: Number(initial.quantity),
+            price: Number(initial.price),
+            tags: initial.tags,
+            image: null,
             is_active: initial.is_active,
           }
         : EMPTY_DRAFT,

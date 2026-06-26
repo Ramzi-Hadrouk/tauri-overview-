@@ -1,4 +1,6 @@
+use std::path::{Path, PathBuf};
 use tauri::State;
+use base64::Engine;
 use crate::core::{
     error::AppError,
     response::{IpcResponse, paginated},
@@ -15,6 +17,13 @@ use super::{
         delete_item::DeleteItemService,
     },
 };
+
+fn images_dir(state: &AppState) -> PathBuf {
+    Path::new(&state.db_path)
+        .parent()
+        .unwrap_or_else(|| Path::new("."))
+        .join("images")
+}
 
 #[tauri::command]
 pub async fn list_items(
@@ -50,7 +59,8 @@ pub async fn create_item(
 ) -> Result<IpcResponse<Item>, AppError> {
     require_permission(&state, "items:create").await?;
     let db = state.db.lock().await;
-    let service = CreateItemService::new(&db);
+    let dir = images_dir(&state);
+    let service = CreateItemService::new(&db, &dir);
     let item = service.execute(data).await?;
     Ok(IpcResponse::success(item, "Item created successfully"))
 }
@@ -63,7 +73,8 @@ pub async fn update_item(
 ) -> Result<IpcResponse<Item>, AppError> {
     require_permission(&state, "items:update").await?;
     let db = state.db.lock().await;
-    let service = UpdateItemService::new(&db);
+    let dir = images_dir(&state);
+    let service = UpdateItemService::new(&db, &dir);
     let item = service.execute(&id, data).await?;
     Ok(IpcResponse::success(item, "Item updated successfully"))
 }
@@ -78,4 +89,19 @@ pub async fn delete_item(
     let service = DeleteItemService::new(&db);
     service.execute(&id).await?;
     Ok(IpcResponse::empty("Item deleted successfully"))
+}
+
+#[tauri::command]
+pub async fn get_item_image(
+    path: String,
+    state: State<'_, AppState>,
+) -> Result<IpcResponse<String>, AppError> {
+    let dir = images_dir(&state);
+    let full_path = dir.join(&path);
+    let bytes = std::fs::read(&full_path)
+        .map_err(|e| AppError::internal(&format!("Failed to read image: {}", e)))?;
+    let ext = full_path.extension().and_then(|e| e.to_str()).unwrap_or("png");
+    let b64 = base64::engine::general_purpose::STANDARD.encode(&bytes);
+    let data_uri = format!("data:image/{};base64,{}", ext, b64);
+    Ok(IpcResponse::success(data_uri, "Image retrieved"))
 }
