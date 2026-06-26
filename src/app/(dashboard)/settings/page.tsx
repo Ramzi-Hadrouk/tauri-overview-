@@ -1,6 +1,6 @@
-import { DashboardShell } from '@/frontend/shared/layouts/dashboard-shell';
+import { DashboardShell } from '@/frontend/shared/layouts/dashboard-group/dashboard-layout';
 import { Box, Typography } from '@mui/material';
-import { BackupRestoreSection } from '@/frontend/modules/(dashboard)/clients/feature-backup-restore/sections/BackupRestoreSection';
+import { BackupRestoreSection } from '@/frontend/modules/(dashboard)/settings';
 
 export default function SettingsPage() {
   return (

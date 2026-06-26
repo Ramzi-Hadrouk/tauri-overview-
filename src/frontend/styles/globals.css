@@ -1,7 +1,5 @@
-/* src/frontend/styles/globals.css */
-/* Minimal CSS resets - MUI handles most styling */
-
-html, body, #root {
+/* Global styles */
+html, body {
   height: 100%;
   margin: 0;
   padding: 0;
