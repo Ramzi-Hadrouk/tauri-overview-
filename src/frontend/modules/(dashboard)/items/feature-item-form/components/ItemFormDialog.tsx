@@ -8,6 +8,7 @@ import { ItemFormErrorSummary } from './ItemFormErrorSummary';
 export function ItemFormDialog() {
   const isOpen = useItemFormStore((s) => s.isOpen);
   const mode = useItemFormStore((s) => s.mode);
+  const formKey = useItemFormStore((s) => s.formKey);
   const closeForm = useItemFormStore((s) => s.closeForm);
 
   const title = mode === 'create' ? 'New Item' : 'Edit Item';
@@ -21,6 +22,7 @@ export function ItemFormDialog() {
       maxWidth="sm"
       fullWidth
       aria-labelledby="item-form-title"
+      key={formKey}
     >
       <DialogTitle id="item-form-title">{title}</DialogTitle>
       <DialogContent dividers>

@@ -30,6 +30,15 @@ pub fn run() {
                 config::database::initialize(&db_url).await
             })?;
 
+            tauri::async_runtime::block_on(async {
+                sqlx::query(
+                    "INSERT OR IGNORE INTO schema_meta (key, value) VALUES ('schema_version', '1')"
+                )
+                .execute(&pool)
+                .await
+            })
+            .map_err(|e| Box::new(std::io::Error::new(std::io::ErrorKind::Other, e)))?;
+
             let min_compat = config::app::AppConfig::min_compatible_schema_version();
             let version: String = tauri::async_runtime::block_on(async {
                 sqlx::query_scalar(

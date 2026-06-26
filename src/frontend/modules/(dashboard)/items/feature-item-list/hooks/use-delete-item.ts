@@ -6,6 +6,7 @@ import { useNotification } from '@/frontend/core/hooks/useNotification';
 
 export function useDeleteItem() {
   const setPage = useItemListStore((s) => s.setPage);
+  const triggerRefresh = useItemListStore((s) => s.triggerRefresh);
   const { confirm } = useConfirm();
   const { success, error } = useNotification();
 
@@ -17,6 +18,7 @@ export function useDeleteItem() {
         try {
           await itemsCommands.deleteItem(id);
           setPage(1);
+          triggerRefresh();
           success(`Item "${displayName}" deleted`);
         } catch (err) {
           error(err instanceof Error ? err.message : String(err));

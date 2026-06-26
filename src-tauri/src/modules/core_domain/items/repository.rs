@@ -46,23 +46,43 @@ impl<'a> ItemRepository<'a> {
         Ok((items, total as u64))
     }
 
-    pub async fn exists_by_name(&self, name: &str) -> Result<bool, AppError> {
-        let count: i64 = sqlx::query_scalar(
-            "SELECT COUNT(*) FROM items WHERE LOWER(name) = LOWER(?)"
-        )
-        .bind(name)
-        .fetch_one(self.db)
-        .await?;
+    pub async fn exists_by_name(&self, name: &str, exclude_id: Option<&str>) -> Result<bool, AppError> {
+        let (sql, id_param): (String, bool) = if let Some(_) = exclude_id {
+            (
+                "SELECT COUNT(*) FROM items WHERE LOWER(name) = LOWER(?) AND is_active = true AND id != ?".into(),
+                true,
+            )
+        } else {
+            (
+                "SELECT COUNT(*) FROM items WHERE LOWER(name) = LOWER(?) AND is_active = true".into(),
+                false,
+            )
+        };
+        let mut query = sqlx::query_scalar::<_, i64>(&sql).bind(name);
+        if id_param {
+            query = query.bind(exclude_id.unwrap());
+        }
+        let count: i64 = query.fetch_one(self.db).await?;
         Ok(count > 0)
     }
 
-    pub async fn exists_by_sku(&self, sku: &str) -> Result<bool, AppError> {
-        let count: i64 = sqlx::query_scalar(
-            "SELECT COUNT(*) FROM items WHERE LOWER(sku) = LOWER(?) AND sku != ''"
-        )
-        .bind(sku)
-        .fetch_one(self.db)
-        .await?;
+    pub async fn exists_by_sku(&self, sku: &str, exclude_id: Option<&str>) -> Result<bool, AppError> {
+        let (sql, id_param): (String, bool) = if let Some(_) = exclude_id {
+            (
+                "SELECT COUNT(*) FROM items WHERE LOWER(sku) = LOWER(?) AND is_active = true AND sku != '' AND id != ?".into(),
+                true,
+            )
+        } else {
+            (
+                "SELECT COUNT(*) FROM items WHERE LOWER(sku) = LOWER(?) AND is_active = true AND sku != ''".into(),
+                false,
+            )
+        };
+        let mut query = sqlx::query_scalar::<_, i64>(&sql).bind(sku);
+        if id_param {
+            query = query.bind(exclude_id.unwrap());
+        }
+        let count: i64 = query.fetch_one(self.db).await?;
         Ok(count > 0)
     }
 }

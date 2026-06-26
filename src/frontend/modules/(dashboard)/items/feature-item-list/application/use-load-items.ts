@@ -5,6 +5,7 @@ import { useItemListStore } from './item-list-store';
 export function useLoadItems() {
   const page = useItemListStore((s) => s.page);
   const size = useItemListStore((s) => s.size);
+  const refreshKey = useItemListStore((s) => s.refreshKey);
   const setResults = useItemListStore((s) => s.setResults);
   const setFetching = useItemListStore((s) => s.setFetching);
   const setError = useItemListStore((s) => s.setError);
@@ -27,7 +28,7 @@ export function useLoadItems() {
       }
     })();
     return () => { cancelled = true; };
-  }, [page, size, setResults, setFetching, setError]);
+  }, [page, size, refreshKey, setResults, setFetching, setError]);
 
   return { items: results, isFetching, lastError };
 }

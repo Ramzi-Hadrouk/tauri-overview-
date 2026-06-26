@@ -7,6 +7,7 @@ import { useItemListStore } from '../../feature-item-list/application/item-list-
 export function useItemForm() {
   const store = useItemFormStore();
   const setPage = useItemListStore((s) => s.setPage);
+  const triggerRefresh = useItemListStore((s) => s.triggerRefresh);
   const { success, error: notifyError } = useNotification();
 
   const submit = async () => {
@@ -51,6 +52,7 @@ export function useItemForm() {
       }
 
       setPage(1);
+      triggerRefresh();
       store.closeForm();
       return true;
     } catch (err) {

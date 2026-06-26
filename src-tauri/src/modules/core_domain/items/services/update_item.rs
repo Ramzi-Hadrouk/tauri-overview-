@@ -32,7 +32,7 @@ impl<'a> UpdateItemService<'a> {
         rules::validate_name(&name)
             .map_err(|e| AppError::validation("name", &e))?;
 
-        if name != existing.name && repo.exists_by_name(&name).await? {
+        if name != existing.name && repo.exists_by_name(&name, Some(id)).await? {
             return Err(ItemError::AlreadyExists.into());
         }
 
@@ -48,7 +48,7 @@ impl<'a> UpdateItemService<'a> {
             if !trimmed.is_empty() {
                 rules::validate_sku(trimmed)
                     .map_err(|e| AppError::validation("sku", &e))?;
-                if trimmed != existing.sku && repo.exists_by_sku(trimmed).await? {
+                if trimmed != existing.sku && repo.exists_by_sku(trimmed, Some(id)).await? {
                     return Err(ItemError::AlreadyExists.into());
                 }
             }

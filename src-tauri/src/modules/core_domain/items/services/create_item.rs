@@ -44,11 +44,11 @@ impl<'a> CreateItemService<'a> {
 
         let repo = ItemRepository::new(self.db);
 
-        if repo.exists_by_name(&trimmed_name).await? {
+        if repo.exists_by_name(&trimmed_name, None).await? {
             return Err(ItemError::AlreadyExists.into());
         }
 
-        if !trimmed_sku.is_empty() && repo.exists_by_sku(&trimmed_sku).await? {
+        if !trimmed_sku.is_empty() && repo.exists_by_sku(&trimmed_sku, None).await? {
             return Err(ItemError::AlreadyExists.into());
         }
 

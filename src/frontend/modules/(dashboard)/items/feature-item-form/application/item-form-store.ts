@@ -32,6 +32,7 @@ interface ItemFormState {
   draft: ItemFormDraft;
   errors: Partial<Record<keyof ItemFormDraft, string>>;
   isSubmitting: boolean;
+  formKey: number;
 
   openForm: (init: { mode: ItemFormMode; editingId?: string; initial?: Item }) => void;
   closeForm: () => void;
@@ -48,9 +49,10 @@ export const useItemFormStore = create<ItemFormState>()((set) => ({
   draft: EMPTY_DRAFT,
   errors: {},
   isSubmitting: false,
+  formKey: 0,
 
   openForm: ({ mode, editingId, initial }) =>
-    set({
+    set((s) => ({
       mode,
       editingId: editingId ?? null,
       isOpen: true,
@@ -68,7 +70,8 @@ export const useItemFormStore = create<ItemFormState>()((set) => ({
         : EMPTY_DRAFT,
       errors: {},
       isSubmitting: false,
-    }),
+      formKey: s.formKey + 1,
+    })),
 
   closeForm: () => set({ isOpen: false }),
 
